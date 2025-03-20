@@ -1,0 +1,57 @@
+<!-- Container -->
+<div class="flex flex-wrap min-h-screen w-full content-center justify-center bg-gray-200 py-10">
+    <div class="flex shadow-md">
+        <div class="flex flex-wrap content-center justify-center rounded-l-md bg-white"
+            style="width: 24em; height: 32rem;">
+            <div class="w-72">
+
+                <img src="./logo.png" class="mb-3 mx-auto block" style="max-width: 100px; height: auto;" alt="">
+                <h1 class="text-xl font-semibold">¡Bienvenido de vuelta! 👋</h1>
+                <small class="text-gray-400 block">Comienza un nuevo día administrando las</small>
+                <small class="text-gray-400 -mt-1 block">asistencias de los docentes.</small>
+
+                <form class="mt-4" [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+                    <div class="mb-3">
+                        <label class="mb-2 block text-xs font-semibold">No. de cuenta</label>
+                        <input formControlName="username" type="text" placeholder="2123134-8"
+                            class="block w-full rounded-md border border-gray-300 focus:border-gray-700 focus:outline-none focus:ring-1 focus:ring-gray-700 py-1 px-1.5 text-gray-500" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="mb-2 block text-xs font-semibold">Contraseña</label>
+                        <input formControlName="password" type="password" placeholder="••••••••"
+                            class="block w-full rounded-md border border-gray-300 focus:border-gray-700 focus:outline-none focus:ring-1 focus:ring-gray-700 py-1 px-1.5 text-gray-500" />
+                    </div>
+
+                    <div class="mb-3 flex flex-wrap content-center">
+                        <a class="text-xs font-bold text-blue-500" style="cursor: pointer;">Olvidé mi
+                            contraseña</a>
+                    </div>
+
+                    @if (errorMessage) {
+                    <div class="alert alert-danger">
+                        {{ errorMessage }}
+                    </div>
+                    }
+
+                    <div class="mb-3">
+                        <button [disabled]="loginForm.invalid || isSubmitting"
+                            class="mb-1.5 block w-full text-center text-white bg-slate-700 hover:bg-slate-900 px-2 py-1.5 rounded-md disabled:bg-gray-300 disabled:cursor-not-allowed transition">Iniciar
+                            sesión</button>
+                    </div>
+                </form>
+
+                <div class="text-center">
+                    <span class="text-xs text-gray-400 font-semibold">¿No cuenta con una cuenta?</span>
+                    <a routerLink="/landing-page"
+                        class="text-xs font-bold hover:underline text-blue-500 cursor-pointer"> Registrate para darte de
+                        alta.</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex flex-wrap content-center justify-center rounded-r-md" style="width: 32rem; height: 32rem;">
+            <img class="w-full h-full rounded-r-md" src="./assets/rectoria.webp" alt="">
+        </div>
+    </div>
+</div>
