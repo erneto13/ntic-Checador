@@ -17,4 +17,8 @@ export class UserService {
   registerUser(user: RegisterRequest): Observable<RegisterRequest> {
     return this.http.post<RegisterRequest>(`${this.API_URL}/register`, user);
   }
+
+  getAllUsers(): Observable<any> {
+    return this.http.get(`${this.API_URL}/users`);
+  }
 }

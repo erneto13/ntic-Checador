@@ -1,13 +1,17 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { Role, User } from '../../../../core/interfaces/user';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+
+import { Role, User } from '../../../../core/interfaces/user';
 import { UserService } from '../../service/user.service';
 import { RegisterRequest } from '../../../../core/interfaces/register-request';
+import { ToastService } from '../../../../core/services/toast.service';
+import { ToastComponent } from "../../../../shared/toast/toast.component";
 
 @Component({
   selector: 'app-user-creation-form',
-  imports: [FormsModule, CommonModule, ReactiveFormsModule],
+  imports: [FormsModule, CommonModule,
+    ReactiveFormsModule, ToastComponent],
   templateUrl: './user-creation-form.component.html',
 })
 export class UserCreationFormComponent implements OnInit {
@@ -21,7 +25,8 @@ export class UserCreationFormComponent implements OnInit {
 
   constructor(
     private fb: FormBuilder,
-    private userService: UserService
+    private userService: UserService,
+    private toastService: ToastService
   ) {
     this.userForm = this.fb.group({
       username: ['', [Validators.required]],
@@ -53,7 +58,7 @@ export class UserCreationFormComponent implements OnInit {
 
   onSubmit(): void {
     if (this.userForm.invalid) {
-      alert('Campos no rellenados');
+      alert('rellena todo');
       return;
     }
 
@@ -68,7 +73,7 @@ export class UserCreationFormComponent implements OnInit {
         this.userForm.reset();
       },
       error: () => {
-        alert('Error al registrar el usuario');
+        alert('algo paso');
       }
     });
   }
