@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "ntic-Checador": {
+    "ntic-Checadorr": {
       "projectType": "application",
       "schematics": {},
       "root": "",
@@ -13,7 +13,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:application",
           "options": {
-            "outputPath": "dist/ntic-checador",
+            "outputPath": "dist/ntic-checadorr",
             "index": "src/index.html",
             "browser": "src/main.ts",
             "polyfills": [
@@ -27,13 +27,13 @@
               }
             ],
             "styles": [
-              "src/styles.scss"
+              "src/styles.css"
             ],
             "scripts": [],
             "server": "src/main.server.ts",
-            "outputMode": "server",
+            "prerender": true,
             "ssr": {
-              "entry": "src/server.ts"
+              "entry": "server.ts"
             }
           },
           "configurations": {
@@ -46,8 +46,8 @@
                 },
                 {
                   "type": "anyComponentStyle",
-                  "maximumWarning": "4kB",
-                  "maximumError": "8kB"
+                  "maximumWarning": "2kB",
+                  "maximumError": "4kB"
                 }
               ],
               "outputHashing": "all"
@@ -55,13 +55,7 @@
             "development": {
               "optimization": false,
               "extractLicenses": false,
-              "sourceMap": true,
-              "fileReplacements": [
-                {
-                  "replace": "src/environments/environment.ts",
-                  "with": "src/environments/environment.development.ts"
-                }
-              ]
+              "sourceMap": true
             }
           },
           "defaultConfiguration": "production"
@@ -70,10 +64,10 @@
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "ntic-Checador:build:production"
+              "buildTarget": "ntic-Checadorr:build:production"
             },
             "development": {
-              "buildTarget": "ntic-Checador:build:development"
+              "buildTarget": "ntic-Checadorr:build:development"
             }
           },
           "defaultConfiguration": "development"
@@ -96,7 +90,7 @@
               }
             ],
             "styles": [
-              "src/styles.scss"
+              "src/styles.css"
             ],
             "scripts": []
           }
@@ -105,6 +99,6 @@
     }
   },
   "cli": {
-    "analytics": "35ac82b5-796d-4775-9864-0b3a37560b7a"
+    "analytics": false
   }
 }

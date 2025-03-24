@@ -3,6 +3,7 @@ import { AuthService } from '../../auth/service/auth.service';
 
 @Component({
   selector: 'app-header',
+  standalone: true,
   imports: [],
   templateUrl: './header.component.html',
 })

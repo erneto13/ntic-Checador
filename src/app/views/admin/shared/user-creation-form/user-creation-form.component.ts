@@ -10,6 +10,7 @@ import { ToastComponent } from "../../../../shared/toast/toast.component";
 
 @Component({
   selector: 'app-user-creation-form',
+  standalone: true,
   imports: [FormsModule, CommonModule,
     ReactiveFormsModule, ToastComponent],
   templateUrl: './user-creation-form.component.html',

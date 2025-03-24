@@ -8,6 +8,7 @@ import { AuthRequest } from '../../core/interfaces/auth-request';
 
 @Component({
   selector: 'app-login',
+  standalone: true,
   imports: [CommonModule, ReactiveFormsModule, RouterLink],
   templateUrl: './login.component.html',
 })
@@ -42,7 +43,7 @@ export default class LoginComponent {
     
     this.auth.login(authRequest).subscribe({
       next: () => {
-        this.router.navigate(['/v1/principal'])
+        this.router.navigate(['/v1/admin/principal'])
       },
       error: (error) => {
         this.isSubmitting = false;

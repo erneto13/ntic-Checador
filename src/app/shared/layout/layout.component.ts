@@ -5,6 +5,7 @@ import { RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-layout',
+  standalone: true,
   imports: [HeaderComponent, SidebarComponent, RouterModule],
   templateUrl: './layout.component.html',
 })
