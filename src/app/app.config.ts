@@ -8,6 +8,8 @@ import { provideHttpClient, HTTP_INTERCEPTORS, withInterceptorsFromDi, withFetch
 
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
+import { providePrimeNG } from 'primeng/config';
+import Nora from '@primeng/themes/nora';
 import { JwtInterceptor } from './core/interceptors/jwt.interceptor';
 import { AuthGuard } from './core/guard/auth.guard';
 
@@ -15,6 +17,7 @@ export const appConfig: ApplicationConfig = {
   providers: [
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes),
+    provideAnimationsAsync(),
     provideClientHydration(withEventReplay()),
     provideHttpClient(withInterceptorsFromDi(), withFetch()),
     {
