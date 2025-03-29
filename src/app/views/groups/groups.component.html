@@ -1,6 +1,5 @@
 <!-- classroom-management.component.html -->
-<div class="container mx-auto pl-32">
-    <h1 class="text-3xl font-bold mb-6">Administrar Salones de Clases</h1>
+<div class="container mx-auto pl-32 mt-10">
 
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <!-- Tarjetas de salones usando *ngFor -->
@@ -34,7 +33,7 @@
             </div>
         </div>
     </div>
-
+    
     <!-- Panel lateral para gestionar el salón seleccionado -->
     <div *ngIf="showPanel" class="fixed inset-0 bg-black/50 z-50" (click)="closePanel($event)">
         <div class="flex justify-end h-full">
@@ -223,7 +222,7 @@
     <!-- Botón flotante para añadir salón -->
     <div class="fixed bottom-8 right-8">
         <button (click)="openModal()"
-            class="bg-blue-600 text-white p-4 rounded-full shadow-lg hover:bg-blue-700 transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+            class="bg-red-600 text-white p-4 rounded-full shadow-lg hover:bg-blue-700 transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <line x1="12" y1="5" x2="12" y2="19"></line>

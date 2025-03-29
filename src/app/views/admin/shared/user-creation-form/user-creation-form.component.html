@@ -1,24 +1,6 @@
-<div class="lg:col-span-1 bg-white rounded-lg border shadow-sm">
-    <div class="p-6 space-y-1 border-b">
-        <div class="flex items-center gap-3">
-            <div class="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                    class="text-blue-600">
-                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
-                    <circle cx="9" cy="7" r="4"></circle>
-                    <line x1="19" x2="19" y1="8" y2="14"></line>
-                    <line x1="16" x2="22" y1="11" y2="11"></line>
-                </svg>
-            </div>
-            <div>
-                <h3 class="text-lg font-semibold">Crear Usuarios</h3>
-                <p class="text-sm text-gray-500">Añadir un nuevo usuario al sistema</p>
-            </div>
-        </div>
-    </div>
+<div class="lg:col-span-1 bg-white rounded-lg shadow-sm">
     <form [formGroup]="userForm" (ngSubmit)="onSubmit()">
-        <div class="p-6 space-y-4">
+        <div class="p-2 space-y-4">
             <div class="space-y-2">
                 <label class="text-sm font-medium">Numero de cuenta</label>
                 <input formControlName="username" placeholder="Ingrese número de cuenta"
@@ -42,52 +24,39 @@
                     <button type="button" (click)="generatePassword()"
                         class="px-3 py-2 border border-gray-300 rounded-md text-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
                         title="Generar contraseña aleatoria">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M20 16C20 16 18 20 12 20C6 20 4 16 4 16"></path>
-                            <path d="M12 4C13.6683 4 15.0098 4.39991 16 5"></path>
-                            <path d="M4 8C4 8 6 4 12 4"></path>
-                            <path d="M18.8726 7.97255C19.5946 8.38982 20.0001 8.75 20.0001 8.75"></path>
-                            <path d="M16 11.75C16 11.75 17 12 17 13C17 14 16 14.25 16 14.25"></path>
-                            <path d="M8 11.75C8 11.75 7 12 7 13C7 14 8 14.25 8 14.25"></path>
-                        </svg>
+                        <i class="pi pi-lock" style="font-size: 0.8rem"></i>
                     </button>
                 </div>
             </div>
             <div class="space-y-2">
                 <label class="text-sm font-medium">Rol</label>
                 <div class="grid grid-cols-2 md:grid-cols-3 gap-2">
-                    @for (role of roles; track $index) {
-                    <button type="button" (click)="selectRole(role)"
-                        [ngClass]="{'bg-blue-600 text-white': selectedRole === role, 'bg-white text-gray-700 border-gray-300': selectedRole !== role}"
-                        class="px-3 py-2 text-sm font-medium border rounded-md flex items-center justify-center hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        {{ role }}
+                    @for (roleLabel of roleLabels; track $index) {
+                    <button type="button" (click)="selectRole(roleLabel)" [ngClass]="{
+                              'bg-blue-600 text-white': selectedRoleLabel === roleLabel, 
+                              'bg-white text-gray-700 border-gray-300': selectedRoleLabel !== roleLabel
+                            }" class="px-3 py-2 text-sm font-medium border rounded-md flex items-center justify-center 
+                            hover:bg-blue-50 hover:text-blue-600 
+                            focus:outline-none focus:ring-2 focus:ring-blue-500 
+                            transition-all duration-300 ease-in-out">
+                        {{ roleLabel }}
                     </button>
                     }
                 </div>
             </div>
+
         </div>
         <div class="p-6 border-t flex gap-2">
             <button type="button" (click)="userForm.reset()"
                 class="w-full px-4 py-2 text-sm font-medium border border-gray-300 rounded-md flex items-center justify-center gap-2 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
-                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <line x1="18" y1="6" x2="6" y2="18"></line>
-                    <line x1="6" y1="6" x2="18" y2="18"></line>
-                </svg>
+                <i class="pi pi-times" style="font-size: 0.8rem"></i>
                 Limpiar
             </button>
             <button type="submit"
                 class="w-full px-4 py-2 text-sm font-medium bg-blue-600 text-white rounded-md flex items-center justify-center gap-2 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
-                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <line x1="12" y1="5" x2="12" y2="19"></line>
-                    <line x1="5" y1="12" x2="19" y2="12"></line>
-                </svg>
-                Crear Usuario
+                <i class="pi pi-plus" style="font-size: 0.8rem"></i>
+                {{ user ? 'Actualizar Usuario' : 'Crear Usuario' }}
             </button>
         </div>
     </form>
-
-    <app-toast />
 </div>

@@ -3,10 +3,13 @@ import { Component } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 
+import { DialogModule } from 'primeng/dialog';
+
 @Component({
   selector: 'app-groups',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink, FormsModule],
+  imports: [CommonModule, ReactiveFormsModule,
+    FormsModule, DialogModule],
   templateUrl: './groups.component.html',
 })
 export default class GroupsComponent {
@@ -14,6 +17,8 @@ export default class GroupsComponent {
   showPanel: boolean = false;
   showModal: boolean = false;
   activeTab: 'schedule' | 'assign' = 'schedule';
+
+  visible: boolean = false;
 
   // Salón seleccionado actualmente
   selectedClassroom: any = null;
@@ -130,6 +135,10 @@ export default class GroupsComponent {
       capacity: null,
       status: 'available'
     };
+  }
+
+  open() {
+    this.visible = true;
   }
 
   closeModal(event: MouseEvent): void {

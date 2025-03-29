@@ -10,6 +10,7 @@ import { UserResponse } from '../../../../core/interfaces/user';
 export class UsertableComponent {
   @Input() users: UserResponse[] = [];
   columnas: any[] = ["Nombre completo", "No. de cuenta", "Rol", "Acciones"];
+  @Input() isLoading: boolean = false;
   @Output() delete = new EventEmitter<number>();
   @Output() edit = new EventEmitter<UserResponse>();
 
@@ -20,5 +21,13 @@ export class UsertableComponent {
 
   editUser(contact: UserResponse): void {
     this.edit.emit(contact);
+  }
+
+  getInitials(name: string): string {
+    return name
+      .split(' ')
+      .map(word => word[0])
+      .join('')
+      .toUpperCase();
   }
 }
