@@ -1,0 +1,71 @@
+<div class="bg-white w-full h-full flex flex-col ">
+    <div class="p-2 border-b sticky bg-white -mt-4 flex justify-between items-center">
+        <div>
+            <h2 class="text-2xl font-bold text-gray-800">{{ classroom?.name }}</h2>
+            <p class="text-sm text-gray-500 mt-1 flex items-center">
+                <i class="pi pi-id-card mr-1"></i>
+                Código: {{ classroom?.groupCode }}
+            </p>
+        </div>
+    </div>
+
+    <!-- Información del aula -->
+    <div class="px-6 py-4 border-b bg-gray-50">
+        <div class="grid grid-cols-2 gap-4">
+            <div>
+                <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Aula Física</h4>
+                <p class="mt-1 text-gray-800 flex items-center">
+                    <i class="pi pi-map-marker mr-2 text-blue-500"></i>
+                    {{ classroom?.classroom || 'No asignada' }}
+                </p>
+            </div>
+            <div>
+                <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Profesor</h4>
+                <p class="mt-1 text-gray-800 flex items-center">
+                    <i class="pi pi-user mr-2 text-blue-500"></i>
+                    {{ classroom?.professor?.name || 'No asignado' }}
+                </p>
+            </div>
+        </div>
+        <div class="mt-4">
+            <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Descripción</h4>
+            <p class="mt-1 text-gray-800">
+                {{ classroom?.description || 'No hay descripción disponible' }}
+            </p>
+        </div>
+    </div>
+
+    <div class="border-b">
+        <nav class="flex -mb-px">
+            <button (click)="activeTab = 'schedule'"
+                class="px-6 py-4 border-b-2 font-medium text-sm transition-all duration-200 flex items-center" [class]="activeTab === 'schedule' ? 
+                            'border-blue-600 text-blue-600' : 
+                            'border-transparent text-gray-500 hover:text-gray-700 focus:outline-none hover:border-gray-300'">
+                <i class="pi pi-calendar mr-2"></i>
+                Horario
+            </button>
+            <button (click)="activeTab = 'assign'"
+                class="px-6 py-4 border-b-2 font-medium text-sm transition-all duration-200 flex items-center" [class]="activeTab === 'assign' ? 
+                            'border-blue-600 text-blue-600' : 
+                            'border-transparent text-gray-500 hover:text-gray-700 focus:outline-none hover:border-gray-300'">
+                <i class="pi pi-users mr-2"></i>
+                Asignar Profesor
+            </button>
+        </nav>
+    </div>
+
+    <!-- Contenido de los tabs -->
+    <div class="flex-1 overflow-y-auto p-6 bg-gray-50">
+        <!-- Tab de Horario -->
+        <div *ngIf="activeTab === 'schedule'" class="space-y-6">
+            <app-schedule-tab [classroom]="classroom"></app-schedule-tab>
+        </div>
+
+        <!-- Tab de Asignar Profesor -->
+        <div *ngIf="activeTab === 'assign'" class="space-y-6">
+            <app-assign-tab>
+            </app-assign-tab>
+        </div>
+
+    </div>
+</div>

@@ -16,7 +16,7 @@ export const routes: Routes = [
             },
             {
                 path: 'v1/grupos',
-                loadComponent: () => import('./views/groups/groups.component'),
+                loadComponent: () => import('./views/classroom-management/classroom-management.component'),
             },
             {
                 path: 'v1/asistencia',
