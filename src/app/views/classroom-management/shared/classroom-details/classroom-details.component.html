@@ -9,32 +9,6 @@
         </div>
     </div>
 
-    <!-- Información del aula -->
-    <div class="px-6 py-4 border-b bg-gray-50">
-        <div class="grid grid-cols-2 gap-4">
-            <div>
-                <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Aula Física</h4>
-                <p class="mt-1 text-gray-800 flex items-center">
-                    <i class="pi pi-map-marker mr-2 text-blue-500"></i>
-                    {{ classroom?.classroom || 'No asignada' }}
-                </p>
-            </div>
-            <div>
-                <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Profesor</h4>
-                <p class="mt-1 text-gray-800 flex items-center">
-                    <i class="pi pi-user mr-2 text-blue-500"></i>
-                    {{ classroom?.professor?.name || 'No asignado' }}
-                </p>
-            </div>
-        </div>
-        <div class="mt-4">
-            <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Descripción</h4>
-            <p class="mt-1 text-gray-800">
-                {{ classroom?.description || 'No hay descripción disponible' }}
-            </p>
-        </div>
-    </div>
-
     <div class="border-b">
         <nav class="flex -mb-px">
             <button (click)="activeTab = 'schedule'"
