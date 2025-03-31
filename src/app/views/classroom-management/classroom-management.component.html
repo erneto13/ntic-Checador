@@ -61,9 +61,9 @@
 
     <!-- modal para detalles del aula -->
     <p-dialog header="Detalles del Aula" [draggable]="false" [modal]="true" [(visible)]="showDetailsModal"
-        [style]="{ width: '40rem' }">
+        [style]="{ width: '80rem' }">
         @if (selectedClassroomDetails) {
-        <app-classroom-details [classroom]="selectedClassroomDetails">
+        <app-classroom-details [classroom]="selectedClassroomDetails" (scheduleCreated)="onCreateSchedule()">
         </app-classroom-details>
         }
     </p-dialog>

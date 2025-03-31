@@ -17,10 +17,15 @@ export interface ClassroomBase {
 
 export interface Classroom extends ClassroomBase {
     id?: number;
-    professor?: { id: number }; 
+    professor?: { id: number };
 }
 
 export interface ClassroomResponse extends ClassroomBase {
     id: number;
-    professor?: Professor; 
+    professor?: Professor;
+}
+
+export interface LocalTime {
+    hour: number;
+    minute: number;
 }

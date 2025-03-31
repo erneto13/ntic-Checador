@@ -11,7 +11,7 @@ import { ScheduleService } from '../../../admin/service/schedules.service';
 export class ScheduleTabComponent implements OnInit {
   @Input() classroom?: ClassroomResponse;
   schedules: Schedule[] = [];
-  daysOfWeek = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes']; 
+  daysOfWeek = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'];
   timeSlots: string[] = [];
   scheduleGrid: any[][] = [];
 
@@ -27,8 +27,7 @@ export class ScheduleTabComponent implements OnInit {
     this.scheduleService.getSchedulesByCourse(courseId).subscribe({
       next: (schedules) => {
         this.schedules = schedules;
-        console.log('Schedules with professor data:', this.schedules);
-        this.organizeScheduleGrid();
+        this.generateScheduleGrid();
       },
       error: (err) => {
         console.error('Error loading schedules:', err);
@@ -36,41 +35,47 @@ export class ScheduleTabComponent implements OnInit {
     });
   }
 
-  organizeScheduleGrid() {
-    const allTimeSlots = new Set<string>();
-    this.schedules.forEach(schedule => {
-      const timeSlot = `${this.formatTime(schedule.startTime)} - ${this.formatTime(schedule.endTime)}`;
-      allTimeSlots.add(timeSlot);
-    });
-    this.timeSlots = Array.from(allTimeSlots).sort();
+  generateScheduleGrid() {
+    // Obtener todos los bloques horarios únicos
+    const uniqueTimeSlots = new Set<string>();
 
+    this.schedules.forEach(schedule => {
+      const timeSlot = this.createTimeSlotKey(schedule.startTime, schedule.endTime);
+      uniqueTimeSlots.add(timeSlot);
+    });
+
+    // Ordenar los bloques horarios
+    this.timeSlots = Array.from(uniqueTimeSlots).sort((a, b) => {
+      return a.localeCompare(b);
+    });
+
+    // Crear la cuadrícula
     this.scheduleGrid = this.timeSlots.map(timeSlot => {
       return this.daysOfWeek.map(day => {
-        return this.schedules.find(s =>
-          this.translateDay(s.day) === day &&
-          `${this.formatTime(s.startTime)} - ${this.formatTime(s.endTime)}` === timeSlot
-        );
+        // Buscar el horario que coincida con el día y bloque horario
+        return this.schedules.find(schedule => {
+          return schedule.day.toLowerCase() === day.toLowerCase() &&
+            this.createTimeSlotKey(schedule.startTime, schedule.endTime) === timeSlot;
+        });
       });
     });
   }
 
-  getProfessorName(professor: Professor): string {
-    return professor ? `Prof. ${professor.name}` : 'Sin asignar';
+  createTimeSlotKey(startTime: string, endTime: string): string {
+    return `${this.formatTime(startTime)}_${this.formatTime(endTime)}`;
   }
 
   formatTime(timeString: string): string {
     if (!timeString) return '';
-    return timeString.substring(0, 5);
+    const [hours, minutes] = timeString.split(':');
+    return `${hours.padStart(2, '0')}:${minutes.padStart(2, '0')}`;
   }
 
-  translateDay(englishDay: string): string {
-    const daysMap: { [key: string]: string } = {
-      'Monday': 'Lunes',
-      'Tuesday': 'Martes',
-      'Wednesday': 'Miércoles',
-      'Thursday': 'Jueves',
-      'Friday': 'Viernes'
-    };
-    return daysMap[englishDay] || englishDay;
+  getProfessorName(professor: Professor): string {
+    return professor ? `Docente. ${professor.name}` : 'Sin asignar';
+  }
+
+  getCourseName(schedule: Schedule | undefined): string {
+    return schedule?.course?.name || '';
   }
 }

@@ -133,4 +133,9 @@ export default class ClassroomManagementComponent implements OnInit {
     this.showModal = false;
     this.showEditModal = false;
   }
+
+  onCreateSchedule() {
+    this.showDetailsModal = false;
+    this.loadClassrooms();
+  }
 }

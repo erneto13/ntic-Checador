@@ -1,45 +1,27 @@
-<div class="bg-white w-full h-full flex flex-col ">
+<div class="bg-white w-full h-full flex flex-col">
     <div class="p-2 border-b sticky bg-white -mt-4 flex justify-between items-center">
         <div>
-            <h2 class="text-2xl font-bold text-gray-800">{{ classroom?.name }}</h2>
-            <p class="text-sm text-gray-500 mt-1 flex items-center">
-                <i class="pi pi-id-card mr-1"></i>
-                Código: {{ classroom?.groupCode }}
-            </p>
+            <h2 class="text-2xl font-bold text-gray-800">{{ classroom?.name }} {{ classroom?.id }}</h2>
         </div>
+        <button
+            class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg focus:outline-none flex items-center space-x-2 transition-colors"
+            (click)="openModal()">
+            <i class="pi pi-plus"></i>
+            <span>Nuevo Horario</span>
+        </button>
     </div>
 
-    <div class="border-b">
-        <nav class="flex -mb-px">
-            <button (click)="activeTab = 'schedule'"
-                class="px-6 py-4 border-b-2 font-medium text-sm transition-all duration-200 flex items-center" [class]="activeTab === 'schedule' ? 
-                            'border-blue-600 text-blue-600' : 
-                            'border-transparent text-gray-500 hover:text-gray-700 focus:outline-none hover:border-gray-300'">
-                <i class="pi pi-calendar mr-2"></i>
-                Horario
-            </button>
-            <button (click)="activeTab = 'assign'"
-                class="px-6 py-4 border-b-2 font-medium text-sm transition-all duration-200 flex items-center" [class]="activeTab === 'assign' ? 
-                            'border-blue-600 text-blue-600' : 
-                            'border-transparent text-gray-500 hover:text-gray-700 focus:outline-none hover:border-gray-300'">
-                <i class="pi pi-users mr-2"></i>
-                Asignar Profesor
-            </button>
-        </nav>
-    </div>
-
-    <!-- Contenido de los tabs -->
     <div class="flex-1 overflow-y-auto p-6 bg-gray-50">
-        <!-- Tab de Horario -->
-        <div *ngIf="activeTab === 'schedule'" class="space-y-6">
+        <div class="space-y-6">
             <app-schedule-tab [classroom]="classroom"></app-schedule-tab>
         </div>
+    </div>
 
-        <!-- Tab de Asignar Profesor -->
-        <div *ngIf="activeTab === 'assign'" class="space-y-6">
-            <app-assign-tab>
-            </app-assign-tab>
+    <div class="flex-1 overflow-y-auto p-6 bg-gray-50">
+        <div class="space-y-6">
+            <p-dialog [(visible)]="showDialog" [draggable]="false" [modal]="true" [style]="{ width: '50vw' }" [header]="'Crear horario'">
+                <app-schedule-form (scheduleCreated)="test()" />
+            </p-dialog>
         </div>
-
     </div>
 </div>
