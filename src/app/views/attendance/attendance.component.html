@@ -1,45 +1,36 @@
-<!-- attendance-tracking.component.html -->
-<div class="container mx-auto pl-36">
+<div class="container mx-auto p-4">
 
-    <!-- Pestañas de navegación principal -->
     <div class="border-b mb-6">
-        <div class="flex">
+        <div class="flex flex-wrap">
             <button (click)="activeMainTab = 'classrooms'"
-                [ngClass]="{'border-transparent text-gray-500': activeMainTab !== 'classrooms', 'border-blue-600 text-blue-600 font-medium': activeMainTab === 'classrooms'}"
-                class="px-4 py-2 border-b-2">
+                    [ngClass]="{'border-transparent text-gray-500': activeMainTab !== 'classrooms', 'border-blue-600 text-blue-600 font-medium': activeMainTab === 'classrooms'}"
+                    class="px-4 py-2 border-b-2">
                 Programar Temarios
             </button>
             <button (click)="activeMainTab = 'attendance'"
-                [ngClass]="{'border-transparent text-gray-500': activeMainTab !== 'attendance', 'border-blue-600 text-blue-600 font-medium': activeMainTab === 'attendance'}"
-                class="px-4 py-2 border-b-2">
+                    [ngClass]="{'border-transparent text-gray-500': activeMainTab !== 'attendance', 'border-blue-600 text-blue-600 font-medium': activeMainTab === 'attendance'}"
+                    class="px-4 py-2 border-b-2">
                 Asistencias
             </button>
         </div>
     </div>
 
-    <!-- Contenido de la pestaña de Asistencias -->
     <div *ngIf="activeMainTab === 'attendance'" class="space-y-6">
-        <!-- Filtros y selección de grupo -->
-        <div class="bg-white rounded-lg border shadow-sm p-6">
+        <div class="bg-white rounded-lg border shadow-sm p-4">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div class="space-y-2">
                     <label for="groupSelect" class="block text-sm font-medium text-gray-700">Grupo</label>
                     <select id="groupSelect" [(ngModel)]="selectedGroup" (change)="loadGroupSchedule()"
-                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
                         <option value="">Seleccionar Grupo</option>
                         <option *ngFor="let group of groups" [value]="group.id">{{ group.name }} - {{ group.classroom }}
                         </option>
                     </select>
                 </div>
                 <div class="space-y-2">
-                    <label for="dateSelect" class="block text-sm font-medium text-gray-700">Fecha</label>
-                    <input type="date" id="dateSelect" [(ngModel)]="selectedDate" (change)="loadGroupSchedule()"
-                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                </div>
-                <div class="space-y-2">
                     <label for="supervisorSelect" class="block text-sm font-medium text-gray-700">Profesor</label>
                     <select id="supervisorSelect" [(ngModel)]="currentSupervisor"
-                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
                         <option value="">Seleccionar Profesor</option>
                         <option *ngFor="let supervisor of supervisors" [value]="supervisor.id">{{ supervisor.name }}
                         </option>
@@ -48,65 +39,58 @@
             </div>
         </div>
 
-        <!-- Contenido principal: Tabla y Gráficas -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <!-- Tabla de Asistencias -->
-            <div class="lg:col-span-1 bg-white rounded-lg border shadow-sm overflow-hidden">
-                <div class="p-4 border-b bg-gray-50">
-                    <h2 class="text-lg font-semibold text-gray-800">
-                        {{ selectedGroupName ? selectedGroupName + ' - ' + selectedGroupClassroom : 'Seleccione un
-                        grupo' }}
-                    </h2>
-                    <p class="text-sm text-gray-500">{{ selectedDate | date:'fullDate' }}</p>
-                </div>
-
-                <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200">
-                        <thead class="bg-gray-50">
-                            <tr>
-                                <th scope="col"
-                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Hora</th>
-                                <th scope="col"
-                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Materia</th>
-                                <th scope="col"
-                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Profesor</th>
-                                <th scope="col"
-                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Asistencia</th>
-                            </tr>
-                        </thead>
-                        <tbody class="bg-white divide-y divide-gray-200">
-                            <tr *ngFor="let schedule of groupSchedules; let i = index" class="hover:bg-gray-50">
-                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{
-                                    schedule.time }}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ schedule.subject }}
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ schedule.professor }}
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    <div class="flex items-center">
-                                        <input type="checkbox" [id]="'attendance-' + i" [(ngModel)]="schedule.attended"
-                                            (change)="confirmAttendance(schedule)"
-                                            class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
-                                        <label [for]="'attendance-' + i" class="ml-2 block text-sm text-gray-900">
-                                            {{ schedule.attended ? 'Asistió' : 'No asistió' }}
-                                        </label>
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr *ngIf="groupSchedules.length === 0">
-                                <td colspan="4" class="px-6 py-4 text-center text-sm text-gray-500">
-                                    No hay clases programadas para este grupo en la fecha seleccionada.
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
+        <div class="bg-white rounded-lg border shadow-sm overflow-hidden">
+            <div class="p-4 border-b bg-gray-50">
+                <h2 class="text-lg font-semibold text-gray-800">
+                    {{ selectedGroupName ? selectedGroupName + ' - ' + selectedGroupClassroom : 'Seleccione un grupo' }}
+                </h2>
+                <p class="text-sm text-gray-500">{{ selectedDate | date:'fullDate' }}</p>
             </div>
 
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th scope="col"
+                                class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Hora</th>
+                            <th scope="col"
+                                class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Materia</th>
+                            <th scope="col"
+                                class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Profesor</th>
+                            <th scope="col"
+                                class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Asistencia</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        <tr *ngFor="let schedule of groupSchedules; let i = index" class="hover:bg-gray-50">
+                            <td class="px-3 py-4 whitespace-nowrap text-sm font-medium text-gray-900 text-center">
+                                {{ schedule.startTime }} {{schedule.endTime}}
+                            </td>
+                            <td class="px-3 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
+                                {{ schedule.professor.specialty }}
+                            </td>
+                            <td class="px-3 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
+                                {{ schedule.professor.name }}
+                            </td>
+                            <td class="px-3 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
+                                <div class="flex justify-center items-center">
+                                    <ng-container *ngIf="!attendanceList[i]">
+                                        <button class="pi pi-check text-green-500 text-2xl mx-1" (click)="confirmAttendance(schedule.id, true)"></button>
+                                        <button class="pi pi-times text-red-500 text-2xl mx-1" (click)="confirmAttendance(schedule.id, false)"></button>
+                                    </ng-container>
+                                    <ng-container *ngIf="attendanceList[i]">
+                                        Asistencia Registrada
+                                    </ng-container>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </div>

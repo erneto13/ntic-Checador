@@ -45,5 +45,7 @@ export class ClassroomService {
   getAllProfessors(): Observable<Professor[]> {
     return this.http.get<Professor[]>(`${environment.apiUrl}/professors`);
   }
-
+  getProfessorsByDepartment(department: string): Observable<Professor[]> {
+    return this.http.get<Professor[]>(`${environment.apiUrl}/department/{department}${department}`);
+  }
 }
