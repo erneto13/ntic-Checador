@@ -20,7 +20,7 @@
                 <i class="pi pi-user text-blue-600 text-sm"></i>
             </div>
             <div>
-                <p class="text-xs text-gray-500">Docente</p>
+                <p class="text-xs text-gray-500">Asesor</p>
                 <p class="text-sm font-medium text-gray-700">{{ classroom.professor?.name }}</p>
             </div>
         </div>
@@ -35,7 +35,6 @@
                 <p class="text-sm font-semibold text-gray-800">{{ classroom.classroom }}</p>
             </div>
 
-            <!-- Botones en posición absoluta abajo a la derecha -->
             <div class="absolute -bottom-3 -right-3 flex space-x-2">
                 <button (click)="onEdit.emit(classroom); $event.stopPropagation()"
                     class="p-2 rounded-full bg-white shadow-md hover:bg-gray-50 text-blue-600 hover:text-blue-700 transition-colors duration-200 border border-gray-200">

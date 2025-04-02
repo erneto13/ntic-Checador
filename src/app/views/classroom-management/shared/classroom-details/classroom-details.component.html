@@ -19,8 +19,9 @@
 
     <div class="flex-1 overflow-y-auto p-6 bg-gray-50">
         <div class="space-y-6">
-            <p-dialog [(visible)]="showDialog" [draggable]="false" [modal]="true" [style]="{ width: '50vw' }" [header]="'Crear horario'">
-                <app-schedule-form (scheduleCreated)="test()" />
+            <p-dialog [(visible)]="showDetailsModal" [draggable]="false" [modal]="true" [header]="'Crear Nuevo Horario'"
+                [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }">
+                <app-schedule-form [classroom]="classroom" (scheduleCreated)="handleScheduleCreated()" />
             </p-dialog>
         </div>
     </div>

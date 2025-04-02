@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnChanges, OnDestroy, OnInit, SimpleChanges } from '@angular/core';
 import { ClassroomResponse } from '../../../../core/interfaces/classroom';
 import { Professor, Schedule } from '../../../../core/interfaces/schedule';
 import { ScheduleService } from '../../../admin/service/schedules.service';
@@ -8,7 +8,7 @@ import { ScheduleService } from '../../../admin/service/schedules.service';
   selector: 'app-schedule-tab',
   templateUrl: './schedule-tab.component.html',
 })
-export class ScheduleTabComponent implements OnInit {
+export class ScheduleTabComponent implements OnInit, OnDestroy, OnChanges {
   @Input() classroom?: ClassroomResponse;
   schedules: Schedule[] = [];
   daysOfWeek = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'];
@@ -18,25 +18,41 @@ export class ScheduleTabComponent implements OnInit {
   constructor(private scheduleService: ScheduleService) { }
 
   ngOnInit(): void {
-    if (this.classroom?.id) {
-      this.loadScheduleByCourseId(this.classroom.id);
+    this.loadSchedules();
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['classroom'] && !changes['classroom'].firstChange) {
+      this.clearScheduleData();
+      this.loadSchedules();
     }
   }
 
-  loadScheduleByCourseId(courseId: number) {
-    this.scheduleService.getSchedulesByCourse(courseId).subscribe({
-      next: (schedules) => {
-        this.schedules = schedules;
-        this.generateScheduleGrid();
-      },
-      error: (err) => {
-        console.error('Error loading schedules:', err);
-      }
-    });
+  ngOnDestroy(): void {
+    this.clearScheduleData();
+  }
+
+  private clearScheduleData(): void {
+    this.schedules = [];
+    this.timeSlots = [];
+    this.scheduleGrid = [];
+  }
+
+  private loadSchedules(): void {
+    if (this.classroom?.id) {
+      this.scheduleService.getSchedulesByCourse(this.classroom.id).subscribe({
+        next: (schedules) => {
+          this.schedules = schedules;
+          this.generateScheduleGrid();
+        },
+        error: (err) => {
+          console.error('Error loading schedules:', err);
+        }
+      });
+    }
   }
 
   generateScheduleGrid() {
-    // Obtener todos los bloques horarios únicos
     const uniqueTimeSlots = new Set<string>();
 
     this.schedules.forEach(schedule => {
@@ -44,15 +60,12 @@ export class ScheduleTabComponent implements OnInit {
       uniqueTimeSlots.add(timeSlot);
     });
 
-    // Ordenar los bloques horarios
     this.timeSlots = Array.from(uniqueTimeSlots).sort((a, b) => {
       return a.localeCompare(b);
     });
 
-    // Crear la cuadrícula
     this.scheduleGrid = this.timeSlots.map(timeSlot => {
       return this.daysOfWeek.map(day => {
-        // Buscar el horario que coincida con el día y bloque horario
         return this.schedules.find(schedule => {
           return schedule.day.toLowerCase() === day.toLowerCase() &&
             this.createTimeSlotKey(schedule.startTime, schedule.endTime) === timeSlot;
@@ -62,7 +75,7 @@ export class ScheduleTabComponent implements OnInit {
   }
 
   createTimeSlotKey(startTime: string, endTime: string): string {
-    return `${this.formatTime(startTime)}_${this.formatTime(endTime)}`;
+    return `${this.formatTime(startTime)} ${this.formatTime(endTime)}`;
   }
 
   formatTime(timeString: string): string {

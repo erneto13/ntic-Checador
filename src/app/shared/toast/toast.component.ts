@@ -1,7 +1,15 @@
-// toast.component.ts
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ToastMessage, ToastService } from '../../core/services/toast.service';
+
+interface ToastItem extends ToastMessage {
+  id: string;
+  exiting: boolean;
+  progress: number;
+  timeoutId?: ReturnType<typeof setTimeout>;
+  intervalId?: ReturnType<typeof setInterval>;
+  createdAt: number;
+}
 
 @Component({
   standalone: true,
@@ -10,58 +18,129 @@ import { ToastMessage, ToastService } from '../../core/services/toast.service';
   styles: [`
     .toast-container {
       position: fixed;
-      z-index: 9999; /* Highest z-index to ensure it's on top */
-      top: 0;
-      left: 0;
-      right: 0;
+      z-index: 9999;
+      top: 80px;
+      right: 20px;
       pointer-events: none;
       display: flex;
       flex-direction: column;
-      align-items: center;
-      padding: 1rem;
+      align-items: flex-end;
+      gap: 12px;
     }
 
     .toast-item {
-      max-width: 24rem;
-      width: 100%;
+      width: 300px;
       pointer-events: auto;
-      margin-bottom: 0.5rem;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+      transform: translateX(0);
+      transition: transform 0.3s ease, opacity 0.3s ease;
+    }
+
+    .toast-content {
+      padding: 12px 16px;
+      position: relative;
+    }
+
+    .toast-progress {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      height: 3px;
+      width: 100%;
+      background: rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+    }
+
+    .toast-progress-bar {
+      height: 100%;
+      transition: width linear;
+    }
+
+    .toast-header {
+      display: flex;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+
+    .toast-icon {
+      margin-right: 10px;
+      font-size: 16px;
+    }
+
+    .toast-title {
+      font-weight: 500;
+      font-size: 14px;
+      flex-grow: 1;
+    }
+
+    .toast-message {
+      font-size: 13px;
+      color: #666;
+      line-height: 1.4;
+    }
+
+    .toast-close {
+      background: none;
+      border: none;
+      color: #999;
+      cursor: pointer;
+      padding: 0;
+      margin-left: 10px;
+      font-size: 14px;
+      transition: color 0.2s;
+    }
+
+    .toast-close:hover {
+      color: #333;
+    }
+
+    .toast-enter {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+
+    .toast-enter-active {
+      transform: translateX(0);
+      opacity: 1;
+    }
+
+    .toast-exit {
+      transform: translateX(0);
+      opacity: 1;
+    }
+
+    .toast-exit-active {
+      transform: translateX(100%);
+      opacity: 0;
     }
   `],
   template: `
     <div class="toast-container">
-      @for (toast of toasts; track $index) {  
-        <div
-          class="toast-item overflow-hidden rounded-lg shadow-lg ring-1 ring-black ring-opacity-5 transform transition"
-          [ngClass]="[
-            'animate-fadeIn',
-            exitingIndexes.includes($index) ? 'animate-fadeOut' : ''
-          ]"
-          (animationend)="onAnimationEnd($index)"
-          style="background: rgba(255, 255, 255, 0.9)"
+      @for (toast of toasts; track toast.id) {
+        <div 
+          class="toast-item"
+          [class.toast-enter-active]="!toast.exiting"
+          [class.toast-exit-active]="toast.exiting"
+          [style.border-left]="'4px solid ' + getToastColor(toast.type)"
         >
-          <div class="p-4">
-            <div class="flex items-start">
-              <div class="flex-shrink-0">
-                <i
-                  [ngClass]="getIconClass(toast.type)"
-                  class="mr-2"
-                  [ngStyle]="{ color: getToastColor(toast.type) }"
-                ></i>
-              </div>
-              <div class="ml-3 w-0 flex-1">
-                <p class="text-sm font-medium text-gray-900">{{ toast.title }}</p>
-                <p class="mt-1 text-sm text-gray-500">{{ toast.message }}</p>
-              </div>
-              <div class="ml-4 flex-shrink-0">
-                <button
-                  type="button"
-                  class="inline-flex rounded-md bg-transparent text-gray-400 hover:text-gray-500 focus:outline-none"
-                  (click)="startExitAnimation($index)"
-                >
-                  <i class="pi pi-times"></i>
-                </button>
-              </div>
+          <div class="toast-content">
+            <div class="toast-header">
+              <i [class]="'toast-icon ' + getIconClass(toast.type)" [style.color]="getToastColor(toast.type)"></i>
+              <span class="toast-title">{{ toast.title }}</span>
+              <button class="toast-close" (click)="dismiss(toast.id)">
+                <i class="pi pi-times"></i>
+              </button>
+            </div>
+            <p class="toast-message">{{ toast.message }}</p>
+            <div class="toast-progress">
+              <div 
+                class="toast-progress-bar" 
+                [style.background]="getToastColor(toast.type)"
+                [style.width]="toast.progress + '%'"
+              ></div>
             </div>
           </div>
         </div>
@@ -70,43 +149,68 @@ import { ToastMessage, ToastService } from '../../core/services/toast.service';
   `,
 })
 export class ToastComponent implements OnInit {
-  toasts: ToastMessage[] = [];
-  exitingIndexes: number[] = [];
+  toasts: ToastItem[] = [];
 
   constructor(private toastService: ToastService) { }
 
   ngOnInit(): void {
     this.toastService.toast$.subscribe((toast) => {
-      this.toasts.push(toast);
-      const index = this.toasts.length - 1;
-      setTimeout(() => this.startExitAnimation(index), 3000);
+      const toastId = Math.random().toString(36).substring(2);
+      const duration = this.toastService.getDuration();
+      const createdAt = Date.now();
+
+      const newToast: ToastItem = {
+        ...toast,
+        id: toastId,
+        exiting: false,
+        progress: 100,
+        createdAt,
+        timeoutId: setTimeout(() => this.dismiss(toastId), duration),
+        intervalId: setInterval(() => {
+          const toastIndex = this.toasts.findIndex(t => t.id === toastId);
+          if (toastIndex !== -1) {
+            const elapsed = Date.now() - this.toasts[toastIndex].createdAt;
+            const remaining = Math.max(0, duration - elapsed);
+            this.toasts[toastIndex].progress = (remaining / duration) * 100;
+          }
+        }, 50)
+      };
+
+      this.toasts.push(newToast);
     });
   }
 
-  startExitAnimation(index: number): void {
-    this.exitingIndexes.push(index);
-  }
+  dismiss(id: string): void {
+    const toastIndex = this.toasts.findIndex(t => t.id === id);
+    if (toastIndex === -1) return;
 
-  onAnimationEnd(index: number): void {
-    if (this.exitingIndexes.includes(index)) {
-      this.exitingIndexes = this.exitingIndexes.filter((i) => i !== index);
-      this.toasts.splice(index, 1);
+    if (this.toasts[toastIndex].timeoutId) {
+      clearTimeout(this.toasts[toastIndex].timeoutId);
     }
+    if (this.toasts[toastIndex].intervalId) {
+      clearInterval(this.toasts[toastIndex].intervalId);
+    }
+
+    this.toasts[toastIndex].exiting = true;
+
+    setTimeout(() => {
+      this.toasts = this.toasts.filter(t => t.id !== id);
+    }, 300);
   }
 
   getToastColor(type: 'success' | 'error' | 'info'): string {
     return {
-      success: 'green',
-      error: 'red',
-      info: 'blue',
+      success: '#10B981',
+      error: '#EF4444',
+      info: '#3B82F6',
     }[type];
   }
 
   getIconClass(type: 'success' | 'error' | 'info'): string {
     return {
-      success: 'pi pi-check',
-      error: 'pi pi-times',
-      info: 'pi pi-info',
+      success: 'pi pi-check-circle',
+      error: 'pi pi-times-circle',
+      info: 'pi pi-info-circle',
     }[type];
   }
 }

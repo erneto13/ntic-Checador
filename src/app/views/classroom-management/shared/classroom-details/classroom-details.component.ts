@@ -19,17 +19,18 @@ export class ClassroomDetailsComponent {
   @Output() assignClass = new EventEmitter<any>();
   @Output() scheduleCreated = new EventEmitter<void>();
 
-  showDialog: boolean = false;
+  showDetailsModal: boolean = false;
 
   onAssignClass(event: any) {
     this.assignClass.emit(event);
   }
 
   openModal() {
-    this.showDialog = true;
+    this.showDetailsModal = true;
   }
 
-  test() {
+  handleScheduleCreated() {
     this.scheduleCreated.emit();
+    this.showDetailsModal = false;
   }
 }

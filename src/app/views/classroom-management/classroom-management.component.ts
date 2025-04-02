@@ -10,6 +10,7 @@ import { ToastService } from '../../core/services/toast.service';
 import { AssignTabComponent } from './shared/assign-tab/assign-tab.component';
 import { ScheduleTabComponent } from './shared/schedule-tab/schedule-tab.component';
 import { ClassroomDetailsComponent } from './shared/classroom-details/classroom-details.component';
+import { ChartsComponent } from "../../shared/charts/charts.component";
 
 @Component({
   selector: 'app-classroom-management',
@@ -20,8 +21,9 @@ import { ClassroomDetailsComponent } from './shared/classroom-details/classroom-
     CommonModule,
     DialogModule,
     ToastComponent,
-    ClassroomDetailsComponent
-  ],
+    ClassroomDetailsComponent,
+    ChartsComponent
+],
   templateUrl: './classroom-management.component.html',
 })
 export default class ClassroomManagementComponent implements OnInit {
