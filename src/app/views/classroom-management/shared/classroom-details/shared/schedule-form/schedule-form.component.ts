@@ -118,10 +118,13 @@ export class ScheduleFormComponent {
           `Se crearon ${this.selectedDays.length} horarios correctamente`,
           'success'
         );
+        this.scheduleForm.reset();
         this.scheduleCreated.emit();
         this.isSubmitting = false;
       },
       error: () => {
+        this.scheduleForm.reset();
+        this.isSubmitting = false;
         this.toastService.showToast(
           'Error',
           'Ocurrió un error al crear algunos horarios',

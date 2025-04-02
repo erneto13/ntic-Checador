@@ -2,11 +2,16 @@ import { Component, Input, OnChanges, OnDestroy, OnInit, SimpleChanges } from '@
 import { ClassroomResponse } from '../../../../core/interfaces/classroom';
 import { Professor, Schedule } from '../../../../core/interfaces/schedule';
 import { ScheduleService } from '../../../admin/service/schedules.service';
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { ToastService } from '../../../../core/services/toast.service';
+import { ConfirmationService } from 'primeng/api';
 
 @Component({
   standalone: true,
   selector: 'app-schedule-tab',
+  imports: [ConfirmDialogModule],
   templateUrl: './schedule-tab.component.html',
+  providers: [ConfirmationService],
 })
 export class ScheduleTabComponent implements OnInit, OnDestroy, OnChanges {
   @Input() classroom?: ClassroomResponse;
@@ -15,7 +20,8 @@ export class ScheduleTabComponent implements OnInit, OnDestroy, OnChanges {
   timeSlots: string[] = [];
   scheduleGrid: any[][] = [];
 
-  constructor(private scheduleService: ScheduleService) { }
+  constructor(private scheduleService: ScheduleService,
+    private toastService: ToastService, private confirmationService: ConfirmationService) { }
 
   ngOnInit(): void {
     this.loadSchedules();
@@ -72,6 +78,26 @@ export class ScheduleTabComponent implements OnInit, OnDestroy, OnChanges {
         });
       });
     });
+  }
+
+  deleteSchedule(id: number) {
+    this.scheduleService.deleteSchedule(id).subscribe({
+      next: () => {
+        this.toastService.showToast(
+          'Horario eliminado',
+          'El horario fue eliminado correctamente',
+          'success'
+        );
+        this.loadSchedules();
+      },
+      error: (err) => {
+        this.toastService.showToast(
+          'Ocurrio un error',
+          'No se pudo eliminar el horario',
+          'error'
+        );
+      }
+    })
   }
 
   createTimeSlotKey(startTime: string, endTime: string): string {
