@@ -11,11 +11,12 @@ export interface Role {
 }
 
 export interface User {
+    id:number,
     username: string,
     email: string,
     password: string,
     name: string,
-    roles: Role[],
+    role: Role,
 }
 
 export enum ERole {
@@ -24,6 +25,7 @@ export enum ERole {
     PROFESSOR = 'PROFESSOR',
     STUDENT = 'STUDENT',
     SUPERVISOR = 'SUPERVISOR',
+    GROUP_LEADER = 'GROUP_LEADER',
 }
 
 export const RoleLabels: Record<ERole, string> = {
@@ -32,6 +34,7 @@ export const RoleLabels: Record<ERole, string> = {
     [ERole.PROFESSOR]: 'Profesor',
     [ERole.STUDENT]: 'Estudiante',
     [ERole.SUPERVISOR]: 'Checador',
+    [ERole.GROUP_LEADER]: 'Lider de Grupo',
 };
 
 export const getRoleKey = (label: string): ERole | null => {

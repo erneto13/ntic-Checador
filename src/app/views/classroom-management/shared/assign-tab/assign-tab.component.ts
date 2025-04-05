@@ -1,7 +1,8 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { Classroom, ClassroomResponse } from '../../../../core/interfaces/classroom';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Classroom, ClassroomResponse, Professor } from '../../../../core/interfaces/classroom';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ClassroomService } from '../../service/classroom-service.service';
 
 @Component({
   selector: 'app-assign-tab',
@@ -9,21 +10,22 @@ import { FormsModule } from '@angular/forms';
   imports: [CommonModule, FormsModule],
   templateUrl: './assign-tab.component.html',
 })
-export class AssignTabComponent {
+export class AssignTabComponent implements OnInit{
   @Input() classroom?: ClassroomResponse;
   @Output() assignClass = new EventEmitter<any>();
-
+  professors: Professor[] = [];
+  constructor(private professorService:ClassroomService) {
+  }
+  ngOnInit(): void {
+      this.loadProfessors();
+  }
   weekDays = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
   timeSlots = [
     { value: '12:00', display: '12:00 PM' },
     // ... más horas
   ];
   
-  professors = [
-    { id: 1, name: 'Profesor 1' },
-    // ... más profesores
-  ];
-  
+
   courses = [
     { id: 1, name: 'Curso 1' },
     // ... más cursos
@@ -42,5 +44,24 @@ export class AssignTabComponent {
       professorId: this.selectedProfessor,
       courseId: this.selectedCourse
     });
+  }
+  loadProfessors() {
+    this.professorService.getProfessorsByDepartment(this.getDeparmentment(this.classroom?.name!)).subscribe({
+      next: (professors) => {
+        this.professors = professors;
+        console.log('Profesores cargados:', professors);
+      },
+      error: (error) => {
+        console.error('Error al cargar los profesores:', error);
+      }
+    });
+  }
+  getDeparmentment(text:string):string{
+    const words = text.split(' ');
+    return words[words.length - 1];
+  }
+  getGroupShift(text:string):string{
+    const words = text.split(' ');
+    return words[words.length - 1];
   }
 }

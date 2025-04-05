@@ -1,3 +1,5 @@
+import { User, UserResponse } from "./user";
+
 export interface Schedule {
     id: number;
     course: Course;
@@ -23,4 +25,15 @@ export interface Professor {
     specialty: string;
     department: string;
     roleName: string;
+}
+export interface Supervisor{
+    id: number;
+    name: string;
+    username: string;
+    email: string;
+    password: string;
+    roleName: string;
+}
+export interface Checker extends User{
+
 }

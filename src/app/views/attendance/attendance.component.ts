@@ -1,6 +1,15 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { Classroom, Professor } from '../../core/interfaces/classroom';
+import { Checker, Course, Schedule, Supervisor } from '../../core/interfaces/schedule';
+import { ScheduleService } from '../admin/service/schedules.service';
+import { ClassroomService } from '../classroom-management/service/classroom-service.service';
+import { AttendanceService } from '../admin/service/attendance.service';
+import { Attendance } from '../../core/interfaces/attendance';
+import { UserService } from '../admin/service/user.service';
+import { Role, User, UserResponse } from '../../core/interfaces/user';
+import { ResponseDto } from '../../core/interfaces/responses';
 
 @Component({
   selector: 'app-attendance',
@@ -13,22 +22,38 @@ export default class AttendanceComponent {
   activeMainTab: 'classrooms' | 'attendance' | 'syllabus' = 'attendance';
 
   // Datos de filtros para asistencias
-  selectedGroup: string = '';
+  selectedGroup: number = 0;
   selectedDate: string = new Date().toISOString().split('T')[0]; // Fecha actual en formato YYYY-MM-DD
-  currentSupervisor: string = '';
-
+  currentChecker: User = {
+    id: 0,
+    username: '',
+    email: '',
+    name: '',
+    role: {} as Role,
+    password: '',
+  };
+  currentUserRole: string = ""; // Obtener el rol del usuario actual
+  currentSupervisor: number = 0;
+  groupSchedules: Schedule[] = [];
+  groups: Classroom[] = [];
+  supervisors: Supervisor[] = [
+    { id: 1,
+      name: "Supervisor 1",
+      username: "212312-2",
+      email: "correo@gmail.com",
+      password: "pass",
+      roleName: "supervisor" },
+  ];
+  professorsList: Professor[] = [];
   // Datos para mostrar en asistencias
   selectedGroupName: string = '';
   selectedGroupClassroom: string = '';
-
   // Datos de asistencia
-  groupSchedules: any[] = [];
-
+  attendanceList: boolean[] = [];
   // Datos para temarios
   selectedProfessor: string = '';
   selectedCourse: string = '';
   selectedPeriod: string = 'current';
-  professorCourses: any[] = [];
   courseSessions: any[] = [];
   selectedSession: any = null;
 
@@ -37,54 +62,10 @@ export default class AttendanceComponent {
   alertType: 'success' | 'error' = 'success';
   alertTitle: string = '';
   alertMessage: string = '';
-
-  // Datos de ejemplo
-  groups: any[] = [
-    { id: '401-15', name: 'Grupo 401-15', classroom: 'Aula 07' },
-    { id: '402-15', name: 'Grupo 402-15', classroom: 'Aula 12' },
-    { id: '403-15', name: 'Grupo 403-15', classroom: 'Aula 15' }
-  ];
-
-  supervisors: any[] = [
-    { id: 'sup1', name: 'Juan Pérez' },
-    { id: 'sup2', name: 'María González' },
-    { id: 'sup3', name: 'Carlos Rodríguez' }
-  ];
-
-  professorsList: any[] = [
-    { id: 'prof1', name: 'José Miguel' },
-    { id: 'prof2', name: 'Herman Corona' },
-    { id: 'prof3', name: 'Rocío Jaqueline' },
-    { id: 'prof4', name: 'Mirna Paolo' },
-    { id: 'prof5', name: 'Edgar Omar' }
-  ];
-
-  // Datos de ejemplo para las gráficas
-  attendanceData = {
-    supervisor: [
-      { category: 'Lunes', value: 85 },
-      { category: 'Martes', value: 92 },
-      { category: 'Miércoles', value: 78 },
-      { category: 'Jueves', value: 95 },
-      { category: 'Viernes', value: 88 }
-    ],
-    student: [
-      { category: 'Lunes', value: 80 },
-      { category: 'Martes', value: 85 },
-      { category: 'Miércoles', value: 75 },
-      { category: 'Jueves', value: 90 },
-      { category: 'Viernes', value: 82 }
-    ],
-    professor: [
-      { category: 'Lunes', value: 95 },
-      { category: 'Martes', value: 98 },
-      { category: 'Miércoles', value: 92 },
-      { category: 'Jueves', value: 100 },
-      { category: 'Viernes', value: 96 }
-    ]
-  };
-
-  constructor() { }
+  constructor(private schedulesService: ScheduleService,
+    private courseService: ClassroomService,
+    private attendanceService: AttendanceService,
+    private userService: UserService) { }
 
   ngOnInit(): void {
     // Cargar datos iniciales
@@ -93,71 +74,101 @@ export default class AttendanceComponent {
 
   // Métodos para la pestaña de Asistencias
   loadGroupSchedule(): void {
-    // En una aplicación real, aquí cargarías los datos del servidor
+    this.userService.getUserByUserName(this.userService.getUserName()).subscribe({
+      next: (response) => {
+        this.currentChecker = response;
+      },
+      error: (error) => {
+        console.error('Error al obtener el supervisor:', error);
+        this.showErrorAlert(
+          'Error al registrar asistencia',
+          'No se pudo obtener el supervisor. Por favor intente nuevamente.'
+        );
+      }
+    });
+    this.currentUserRole = this.userService.getUserRole();
+    this.loadProfessorCourses();
     if (!this.selectedGroup) {
       this.groupSchedules = [];
       this.selectedGroupName = '';
       this.selectedGroupClassroom = '';
       return;
     }
-
+    this.groupSchedules = [];
+    this.selectedGroupName = '';
+    this.selectedGroupClassroom = '';
+    this.attendanceList = [];
+    this.schedulesService.getSchedulesByCourse(this.selectedGroup).subscribe({
+      next: (response) => {
+        this.groupSchedules = response;
+        console.log('Horarios del grupo:', this.groupSchedules);
+        this.groupSchedules.forEach(schedule => {
+          this.checkAttendanceToday(schedule);
+        })
+        console.log(this.attendanceList);
+      }
+    })
     // Encontrar el grupo seleccionado
-    const group = this.groups.find(g => g.id === this.selectedGroup);
+    //Esta mamada no estaba funcionando pq el id del numero estaba como "id?" xDD convirtiendo el id a number ya jala 🙉
+    const group = this.groups.find(group => group.id === Number(this.selectedGroup));
     if (group) {
       this.selectedGroupName = group.name;
       this.selectedGroupClassroom = group.classroom;
+      console.log("Founded Group", group);
     }
-
-    // Datos de ejemplo para el horario del grupo
-    this.groupSchedules = [
-      {
-        time: '14:00-15:00',
-        subject: 'Innovación',
-        professor: 'José Miguel',
-        attended: false
-      },
-      {
-        time: '15:00-16:00',
-        subject: 'Graficación',
-        professor: 'Herman Corona',
-        attended: false
-      },
-      {
-        time: '16:00-17:00',
-        subject: 'Sistemas Digital',
-        professor: 'Rocío Jaqueline',
-        attended: false
-      },
-      {
-        time: '17:00-18:00',
-        subject: 'Computación Ubicua',
-        professor: 'Mirna Paolo',
-        attended: false
-      },
-      {
-        time: '18:00-19:00',
-        subject: 'Redes Neuronales',
-        professor: 'Edgar Omar',
-        attended: false
-      }
-    ];
   }
 
-  confirmAttendance(schedule: any): void {
-    if (!this.currentSupervisor) {
-      this.showErrorAlert('Supervisor no seleccionado', 'Por favor seleccione un supervisor antes de registrar la asistencia.');
-      schedule.attended = !schedule.attended; // Revertir el cambio
+  confirmAttendance(scheduleId: number, present: boolean): void {
+    const schedule = this.groupSchedules.find(schedule => schedule.id === scheduleId);
+
+    if (!schedule) {
+      console.error('Schedule not found for the given ID.');
+      this.showErrorAlert(
+        'Error al registrar asistencia',
+        'No se encontró el horario correspondiente. Por favor intente nuevamente.'
+      );
       return;
     }
-
-    const status = schedule.attended ? 'asistencia' : 'inasistencia';
-    const supervisor = this.supervisors.find(s => s.id === this.currentSupervisor)?.name || 'Supervisor';
-
+    const attendance: Attendance = {
+      professor: schedule.professor,
+      course: schedule.course,
+      date: this.selectedDate,
+      checkInTime: schedule.startTime,
+      checkOutTime: schedule.endTime,
+      weeklyTopic: "",
+      present: present,
+      checker: this.currentChecker,
+      checker_type: this.currentUserRole,
+    };
+    console.log(attendance);
+    console.log('Asistencia:', attendance);
+    this.attendanceService.createAttendance(attendance).subscribe({
+      next: (response) => {
+        console.log('Asistencia registrada:', response);
+        this.showSuccessAlert(
+          'Asistencia registrada',
+          `La asistencia ha sido registrada correctamente.`
+        );
+        // Update attendanceList immediately
+        const scheduleIndex = this.groupSchedules.findIndex(s => s.id === scheduleId);
+        if (scheduleIndex !== -1) {
+          this.attendanceList[scheduleIndex] = true; // Or your logic to mark it as registered
+        }
+      },
+      error: (error) => {
+        console.error('Error al registrar asistencia:', error);
+        this.showErrorAlert(
+          'Error al registrar asistencia',
+          `No se pudo registrar la asistencia. Por favor intente nuevamente.`
+        );
+      }
+    });
+    /*
     this.showSuccessAlert(
       'Registro exitoso',
       `Se ha registrado la ${status} del profesor ${schedule.professor} para la clase de ${schedule.subject} a las ${schedule.time} por ${supervisor}.`
     );
-
+  */
     // En una aplicación real, aquí enviarías los datos al servidor
   }
 
@@ -165,33 +176,32 @@ export default class AttendanceComponent {
   loadProfessorCourses(): void {
     // En una aplicación real, aquí cargarías los datos del servidor
     if (!this.selectedProfessor) {
-      this.professorCourses = [];
-      this.selectedCourse = '';
-      this.courseSessions = [];
-      this.selectedSession = null;
+      this.courseService.getAllCourse().subscribe({
+        next: (response) => {
+          console.log('Cursos del profesor:', this.groups);
+          this.groups = response;
+          this.selectedCourse = '';
+          this.courseSessions = [];
+          this.selectedSession = null;
+        },
+        error: (error) => {
+          console.error('Error al cargar los cursos:', error);
+          this.groups = [];
+        }
+      })
       return;
     }
-
-    // Datos de ejemplo para las materias del profesor
-    this.professorCourses = [
-      {
-        id: 'course1',
-        name: 'Innovación',
-        group: 'Grupo 401-15'
-      },
-      {
-        id: 'course2',
-        name: 'Graficación',
-        group: 'Grupo 402-15'
-      },
-      {
-        id: 'course3',
-        name: 'Sistemas Digital',
-        group: 'Grupo 403-15'
-      }
-    ];
   }
+  public checkAttendanceToday(schedule: Schedule): void {
 
+    this.attendanceService.attendanceToday(schedule.professor.id, schedule.course.id).subscribe({
+      next: (res) => {
+        this.attendanceList.push(res.response);
+      }, error: (error) => {
+        console.error('Error al cargar los cursos:', error);
+      }
+    })
+  }
   loadCourseSessions(): void {
     // En una aplicación real, aquí cargarías los datos del servidor
     if (!this.selectedCourse) {
@@ -322,5 +332,4 @@ export default class AttendanceComponent {
   closeAlert(): void {
     this.showAlert = false;
   }
-
 }

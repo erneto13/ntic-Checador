@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { AuthRequest } from '../../core/interfaces/auth-request';
 import { map, Observable, tap } from 'rxjs';
 import { TokenResponse } from '../../core/interfaces/token-response';
+import { User } from '../../core/interfaces/user';
 
 @Injectable({
   providedIn: 'root'
@@ -15,7 +16,7 @@ export class AuthService {
   private REGISTER_URL = `${environment.apiUrl}/auth/register`;
   private REFRESH_URL = `${environment.apiUrl}/auth/refresh-token`;
 
-  constructor(private http: HttpClient, private router: Router) { }
+  constructor(private http: HttpClient, private router: Router, ) { }
 
   login(request: AuthRequest): Observable<TokenResponse> {
     return this.http.post<TokenResponse>(this.LOGIN_URL, request)
@@ -24,7 +25,7 @@ export class AuthService {
           this.saveTokens(response);
         })
       );
-  }
+    }
 
   register(request: any): Observable<TokenResponse> {
     return this.http.post<TokenResponse>(this.REGISTER_URL, request)
