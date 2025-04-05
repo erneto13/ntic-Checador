@@ -1,0 +1,39 @@
+<div class="overflow-x-auto shadow-md sm:rounded-lg">
+    <table class="w-full text-sm text-left rtl:text-right text-gray-500">
+        <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+            <tr>
+                @for (col of columnas; track $index) {
+                <th scope="col" class="px-6 py-3">
+                    {{ col }}
+                </th>
+                }
+            </tr>
+        </thead>
+        <tbody>
+            @for (career of careers; track career.id) {
+            <tr class="bg-white border-b hover:bg-gray-50">
+                <td class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
+                    {{ career.name }}
+                </td>
+                <td class="px-6 py-4 text-right">
+                    <div class="flex justify-end gap-2">
+                        <button (click)="editCareer(career)" class="text-blue-600 hover:text-blue-900" title="Editar">
+                            <i class="pi pi-pencil"></i>
+                        </button>
+                        <button (click)="deleteCareer(career.id)" class="text-red-600 hover:text-red-900 ml-2"
+                            title="Eliminar">
+                            <i class="pi pi-trash"></i>
+                        </button>
+                    </div>
+                </td>
+            </tr>
+            } @empty {
+            <tr class="bg-white border-b">
+                <td colspan="4" class="px-6 py-4 text-center text-gray-500">
+                    No se encontraron carreras
+                </td>
+            </tr>
+            }
+        </tbody>
+    </table>
+</div>

@@ -30,14 +30,10 @@
             <div class="flex-1">
                 <label class="block text-sm font-medium text-gray-700 mb-1">Asesor</label>
                 <div class="relative">
-                    <i class="pi pi-user absolute top-1/2 left-3 transform -translate-y-1/2 text-gray-400"></i>
-                    <select formControlName="professor_id"
-                        class="pl-10 w-full py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-400 focus:border-transparent focus:outline-none text-sm appearance-none">
-                        <option [ngValue]="null">Sin asignar</option>
-                        @for (professor of professors; track professor.id) {
-                        <option [value]="professor.id">{{ professor.name }}</option>
-                        }
-                    </select>
+                    <app-dropdown [options]="professors" [displayField]="'name'" [valueField]="'id'"
+                        [placeholder]="'Sin asignar'" (selected)="onProfessorSelected($event)">
+                        <i icon class="pi pi-user absolute top-1/2 left-3 transform -translate-y-1/2 text-gray-400"></i>
+                    </app-dropdown>
                 </div>
             </div>
         </div>

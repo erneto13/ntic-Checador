@@ -177,8 +177,6 @@ export class UserCreationFormComponent implements OnInit, OnChanges {
       delete payload.password;
     }
 
-    console.log('Payload a enviar:', JSON.stringify(payload, null, 2)); 
-
     this.userService.updateUser(id, payload).subscribe({
       next: (response) => {
         this.toastService.showToast(
@@ -196,7 +194,6 @@ export class UserCreationFormComponent implements OnInit, OnChanges {
           err?.error?.message || 'No se ha logrado actualizar el usuario',
           'error'
         );
-        console.error('Error completo:', err);
       }
     });
   }

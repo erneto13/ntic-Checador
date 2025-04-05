@@ -4,11 +4,13 @@ import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } 
 import { ClassroomService } from '../../service/classroom-service.service';
 import { ToastService } from '../../../../core/services/toast.service';
 import { CommonModule } from '@angular/common';
+import { DropdownComponent } from '../../../../shared/dropdown/dropdown.component';
 
 @Component({
   selector: 'app-classroom-form',
   standalone: true,
-  imports: [FormsModule, CommonModule, ReactiveFormsModule],
+  imports: [FormsModule, CommonModule, ReactiveFormsModule,
+    DropdownComponent],
   templateUrl: './classroom-form.component.html',
 })
 export class ClassroomFormComponent implements OnInit {
@@ -136,6 +138,10 @@ export class ClassroomFormComponent implements OnInit {
         );
       }
     });
+  }
+
+  onProfessorSelected(professor: any) {
+    this.classroomForm.get('professor_id')?.setValue(professor?.id || null);
   }
 
   cancelForm(): void {

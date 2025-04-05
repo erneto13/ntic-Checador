@@ -23,10 +23,6 @@ export const routes: Routes = [
                 loadComponent: () => import('./views/attendance/attendance.component'),
             },
             {
-                path: 'v1/evaluaciones',
-                loadComponent: () => import('./views/evaluation/evaluation.component'),
-            },
-            {
                 path: '', redirectTo: 'v1/principal', pathMatch: 'full'
             }
         ]

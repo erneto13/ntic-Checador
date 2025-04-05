@@ -22,7 +22,6 @@ import { ChartsComponent } from "../../shared/charts/charts.component";
     DialogModule,
     ToastComponent,
     ClassroomDetailsComponent,
-    ChartsComponent
 ],
   templateUrl: './classroom-management.component.html',
 })
