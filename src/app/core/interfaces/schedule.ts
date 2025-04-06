@@ -26,7 +26,7 @@ export interface Professor {
     department: string;
     roleName: string;
 }
-export interface Supervisor{
+export interface Supervisor {
     id: number;
     name: string;
     username: string;
@@ -34,6 +34,7 @@ export interface Supervisor{
     password: string;
     roleName: string;
 }
-export interface Checker extends User{
+
+export interface Checker extends User {
 
 }

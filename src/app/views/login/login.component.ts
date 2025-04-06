@@ -5,22 +5,24 @@ import { Route, Router, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../auth/service/auth.service';
 import { AuthRequest } from '../../core/interfaces/auth-request';
+import { ToastService } from '../../core/services/toast.service';
+import { ToastComponent } from '../../shared/toast/toast.component';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink, ToastComponent],
   templateUrl: './login.component.html',
 })
 export default class LoginComponent {
   loginForm: FormGroup;
   isSubmitting = false;
-  errorMessage = '';
 
   constructor(
     private auth: AuthService,
     private router: Router,
     private fb: FormBuilder,
+    private toastService: ToastService
   ) {
     this.loginForm = this.fb.group({
       username: ['', [Validators.required]],
@@ -34,7 +36,6 @@ export default class LoginComponent {
     }
     
     this.isSubmitting = true;
-    this.errorMessage = '';
     
     const authRequest: AuthRequest = {
       username: this.loginForm.get('username')?.value,
@@ -47,7 +48,11 @@ export default class LoginComponent {
       },
       error: (error) => {
         this.isSubmitting = false;
-        this.errorMessage = error.error?.message || 'Error en la autenticación. Inténtalo de nuevo.';
+        this.toastService.showToast(
+          'Ocurrio un error',
+          'Error en la autenticación. Inténtalo de nuevo.',
+          'error'
+        )
       }
     });
   }

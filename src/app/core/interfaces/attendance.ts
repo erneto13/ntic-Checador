@@ -5,16 +5,16 @@ import { User } from "./user";
 export interface Attendance {
     id?: number;
     professor: Professor;
-    course:Course;
+    course: Course;
     date: string;
     checkInTime: string;
     checkOutTime: string;
     present: boolean;
     weeklyTopic: string;
-    checker:User;
+    checker: User;
     checker_type: string;
 }
-export interface AttendanceCheckDto{
-    professor:Professor;
-    course:Course;
+export interface AttendanceCheckDto {
+    professor: Professor;
+    course: Course;
 }

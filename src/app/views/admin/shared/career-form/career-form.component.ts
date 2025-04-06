@@ -54,7 +54,6 @@ export class CareerFormComponent {
       const careerUpdate: any = {
         id: this.career.id,
         name: this.career.name,
-        department_id: 1
       }
 
       this.updateCareer(this.career?.id, this.careerUpdated)
@@ -62,7 +61,6 @@ export class CareerFormComponent {
     } else {
       const newCareer: any = {
         name: formValues.name,
-        department_id: formValues.department_id
       }
 
       this.registerCareer(newCareer)
@@ -95,7 +93,6 @@ export class CareerFormComponent {
     const payload = {
       id: updateCareer.id,
       name: updateCareer.name,
-      department_id: updateCareer.department_id
     };
 
     this.careerService.updateCareer(id, payload).subscribe({

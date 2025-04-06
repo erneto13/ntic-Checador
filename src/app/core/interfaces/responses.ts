@@ -1,4 +1,4 @@
-export interface ResponseDto{
+export interface ResponseDto {
     response: any;
     message: string;
 }

@@ -8,9 +8,6 @@ import { UserPaginationComponent } from './shared/user-pagination/user-paginatio
 import { UserSearchbarComponent } from './shared/user-searchbar/user-searchbar.component';
 import { ToastService } from '../../core/services/toast.service';
 import { ToastComponent } from '../../shared/toast/toast.component';
-import { DepartmentsTableComponent } from "./shared/departments-table/departments-table.component";
-import { DepartmentResponse } from '../../core/interfaces/department';
-import { DepartmentService } from './service/department.service';
 import { CareerTableComponent } from "./shared/career-table/career-table.component";
 import { CareerResponse } from '../../core/interfaces/career';
 import { CareerService } from './service/career.service';
@@ -26,7 +23,6 @@ import { CareerFormComponent } from "./shared/career-form/career-form.component"
     UserPaginationComponent,
     UserSearchbarComponent,
     ToastComponent,
-    DepartmentsTableComponent,
     CareerTableComponent,
     CareerFormComponent
   ],
@@ -40,13 +36,6 @@ export default class AdminComponent implements OnInit {
   userModalVisible: boolean = false;
   userEditModalVisible: boolean = false;
 
-  // Datos y estado para departamentos
-  allDepartments: DepartmentResponse[] = [];
-  departmentToEdit: DepartmentResponse | null = null;
-  departmentModalVisible: boolean = false;
-  departmentEditModalVisible: boolean = false;
-
-  // Datos y estado para carreras
   allCareers: CareerResponse[] = [];
   careerToEdit: CareerResponse | null = null;
   careerModalVisible: boolean = false;
@@ -74,7 +63,6 @@ export default class AdminComponent implements OnInit {
   tabs = [
     { id: 'users', label: 'Usuarios', icon: 'pi pi-users' },
     { id: 'careers', label: 'Carreras', icon: 'pi pi-book' },
-    { id: 'departments', label: 'Departamentos', icon: 'pi pi-building' },
     { id: 'subjects', label: 'Materias', icon: 'pi pi-list' },
   ];
   activeTab: string = 'users';
@@ -88,19 +76,15 @@ export default class AdminComponent implements OnInit {
 
   constructor(
     private userService: UserService,
-    private departmentService: DepartmentService,
     private careerService: CareerService,
     private toastService: ToastService
   ) { }
 
   ngOnInit(): void {
-    // Cargar datos iniciales según necesidad
     this.loadInitialData();
   }
 
   private loadInitialData(): void {
-    // Puedes cargar datos iniciales si es necesario
-    // Por ejemplo, si siempre se muestra primero el tab de usuarios:
     this.loadUsers();
   }
 
@@ -114,9 +98,6 @@ export default class AdminComponent implements OnInit {
         break;
       case 'careers':
         if (!this.dataLoaded.careers) this.loadCareers();
-        break;
-      case 'departments':
-        if (!this.dataLoaded.departments) this.loadDepartments();
         break;
     }
   }
@@ -141,31 +122,6 @@ export default class AdminComponent implements OnInit {
         this.toastService.showToast(
           'Error',
           'No se lograron obtener los usuarios.',
-          'error'
-        );
-      }
-    });
-  }
-
-  // Métodos para departamentos
-  loadDepartments(): void {
-    if (this.loadingStates.departments) return;
-
-    this.loadingStates.departments = true;
-    this.loadingStates.error.departments = false;
-
-    this.departmentService.getAllDepartments().subscribe({
-      next: (data) => {
-        this.allDepartments = data;
-        this.dataLoaded.departments = true;
-        this.loadingStates.departments = false;
-      },
-      error: (error) => {
-        this.loadingStates.error.departments = true;
-        this.loadingStates.departments = false;
-        this.toastService.showToast(
-          'Error',
-          'No se lograron obtener los departamentos.',
           'error'
         );
       }
@@ -234,10 +190,6 @@ export default class AdminComponent implements OnInit {
     this.careerModalVisible = true;
   }
 
-  openDepartmentModal(): void {
-    this.departmentModalVisible = true;
-  }
-
   // Métodos para edición
   onEditUser(user: UserResponse): void {
     this.userToEdit = { ...user };
@@ -247,11 +199,6 @@ export default class AdminComponent implements OnInit {
   onEditCareer(career: CareerResponse): void {
     this.careerToEdit = { ...career };
     this.careerEditModalVisible = true;
-  }
-
-  onEditDepartment(department: DepartmentResponse): void {
-    this.departmentToEdit = { ...department };
-    this.departmentEditModalVisible = true;
   }
 
   // Métodos para actualización de datos
@@ -270,14 +217,6 @@ export default class AdminComponent implements OnInit {
       this.allCareers[index] = updatedCareer;
     }
     this.careerEditModalVisible = false;
-  }
-
-  onDepartmentUpdated(updatedDepartment: DepartmentResponse): void {
-    const index = this.allDepartments.findIndex(d => d.id === updatedDepartment.id);
-    if (index !== -1) {
-      this.allDepartments[index] = updatedDepartment;
-    }
-    this.departmentEditModalVisible = false;
   }
 
   // Métodos para eliminación
@@ -321,23 +260,4 @@ export default class AdminComponent implements OnInit {
     });
   }
 
-  deleteDepartment(id: number): void {
-    this.departmentService.deleteDepartment(id).subscribe({
-      next: () => {
-        this.loadDepartments();
-        this.toastService.showToast(
-          'Éxito',
-          'Departamento eliminado correctamente.',
-          'success'
-        );
-      },
-      error: (error) => {
-        this.toastService.showToast(
-          'Error',
-          'No se logró eliminar el departamento.',
-          'error'
-        );
-      }
-    });
-  }
 }

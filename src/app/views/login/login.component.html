@@ -28,12 +28,6 @@
                             contraseña</a>
                     </div>
 
-                    @if (errorMessage) {
-                    <div class="alert alert-danger">
-                        {{ errorMessage }}
-                    </div>
-                    }
-
                     <div class="mb-3">
                         <button [disabled]="loginForm.invalid || isSubmitting"
                             class="mb-1.5 block w-full text-center cursor-pointer text-white bg-slate-700 hover:bg-slate-900 px-2 py-1.5 rounded-md disabled:bg-gray-300 disabled:cursor-not-allowed transition">Iniciar
@@ -54,4 +48,6 @@
             <img class="w-full h-full rounded-r-md" src="./assets/rectoria.webp" alt="">
         </div>
     </div>
+
+    <app-toast />
 </div>

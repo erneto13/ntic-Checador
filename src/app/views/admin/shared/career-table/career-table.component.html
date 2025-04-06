@@ -1,39 +1,40 @@
-<div class="overflow-x-auto shadow-md sm:rounded-lg">
-    <table class="w-full text-sm text-left rtl:text-right text-gray-500">
-        <thead class="text-xs text-gray-700 uppercase bg-gray-50">
-            <tr>
-                @for (col of columnas; track $index) {
-                <th scope="col" class="px-6 py-3">
-                    {{ col }}
-                </th>
-                }
-            </tr>
-        </thead>
-        <tbody>
-            @for (career of careers; track career.id) {
-            <tr class="bg-white border-b hover:bg-gray-50">
-                <td class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
-                    {{ career.name }}
-                </td>
-                <td class="px-6 py-4 text-right">
-                    <div class="flex justify-end gap-2">
-                        <button (click)="editCareer(career)" class="text-blue-600 hover:text-blue-900" title="Editar">
-                            <i class="pi pi-pencil"></i>
-                        </button>
-                        <button (click)="deleteCareer(career.id)" class="text-red-600 hover:text-red-900 ml-2"
-                            title="Eliminar">
-                            <i class="pi pi-trash"></i>
-                        </button>
-                    </div>
-                </td>
-            </tr>
-            } @empty {
-            <tr class="bg-white border-b">
-                <td colspan="4" class="px-6 py-4 text-center text-gray-500">
-                    No se encontraron carreras
-                </td>
-            </tr>
+<table class="w-full caption-bottom text-sm">
+    <thead>
+        <tr class="border-b transition-colors hover:bg-gray-50">
+            @for (col of columnas; track $index) {
+            <th class="h-12 px-4 text-left align-middle font-medium">{{ col }}</th>
             }
-        </tbody>
-    </table>
-</div>
+        </tr>
+    </thead>
+    <tbody>
+        @if (careers.length === 0) {
+        <tr>
+            <td colspan="2" class="p-8 text-center text-gray-500">
+                <div class="flex flex-col items-center gap-2">
+                    <i class="pi pi-book text-3xl"></i>
+                    <span>No hay carreras registradas</span>
+                </div>
+            </td>
+        </tr>
+        } @else {
+        @for (career of careers; track career.id) {
+        <tr class="border-b transition-colors hover:bg-gray-50">
+            <td class="p-4 align-middle font-medium">{{ career.name }}</td>
+
+            <td class="p-4 align-middle">
+                <div class="flex items-center gap-2">
+                    <button (click)="editCareer(career)"
+                        class="h-8 w-8 p-0 inline-flex items-center justify-center rounded-md cursor-pointer border border-gray-300 text-gray-500 hover:bg-gray-50">
+                        <i class="pi pi-pencil"></i>
+                    </button>
+                    <button (click)="deleteCareer(career.id)"
+                        class="h-8 w-8 p-0 inline-flex items-center justify-center rounded-md border cursor-pointer border-gray-300 text-red-500 hover:bg-gray-50">
+                        <i class="pi pi-trash"></i>
+                    </button>
+                </div>
+            </td>
+        </tr>
+        }
+        }
+    </tbody>
+</table>
