@@ -23,9 +23,9 @@ export const routes: Routes = [
                 loadComponent: () => import('./views/attendance/attendance.component'),
             },
             {
-                path: '', redirectTo: 'v1/principal', pathMatch: 'full'
+                path: '', redirectTo: 'v1/admin/principal', pathMatch: 'full'
             }
         ]
     },
-    { path: '**', redirectTo: 'v1/principal' },
+    { path: '**', redirectTo: 'v1/admin/principal' },
 ];
