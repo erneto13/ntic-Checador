@@ -2,41 +2,35 @@ import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 
 @Component({
-  selector: 'app-user-pagination',
+  selector: 'app-pagination',
   standalone: true,
   imports: [CommonModule],
   templateUrl: './user-pagination.component.html',
 })
 export class UserPaginationComponent {
-  @Input() currentPage = 0;
-  @Input() totalPages = 0;
+  @Input() currentPage: number = 0;
+  @Input() totalPages: number = 0;
   @Output() pageChange = new EventEmitter<number>();
 
-  get pages(): number[] {
-    return Array(this.totalPages).fill(0).map((_, i) => i);
-  }
+  getVisiblePages(): number[] {
+    const visiblePages = 5;
+    const pages: number[] = [];
+    let startPage = Math.max(0, this.currentPage - Math.floor(visiblePages / 2));
+    let endPage = startPage + visiblePages - 1;
 
-  getVisiblePages(currentPage: number, totalPages: number): number[] {
-    const maxVisible = 200;
-    const half = Math.floor(maxVisible / 2);
-    let start = Math.max(0, currentPage - half);
-    let end = Math.min(totalPages - 1, currentPage + half);
-
-    if (currentPage - half < 0) {
-      end = Math.min(totalPages - 1, end + (half - currentPage));
-    }
-    if (currentPage + half > totalPages - 1) {
-      start = Math.max(0, start - ((currentPage + half) - (totalPages - 1)));
+    if (endPage >= this.totalPages) {
+      endPage = this.totalPages - 1;
+      startPage = Math.max(0, endPage - visiblePages + 1);
     }
 
-    const pages = [];
-    for (let i = start; i <= end; i++) {
+    for (let i = startPage; i <= endPage; i++) {
       pages.push(i);
     }
+
     return pages;
   }
 
-  onPageClick(page: number): void {
+  onPageChange(page: number): void {
     if (page >= 0 && page < this.totalPages) {
       this.pageChange.emit(page);
     }

@@ -1,28 +1,36 @@
-import { Component, EventEmitter, Output } from '@angular/core';
-import { debounceTime, distinctUntilChanged, Subject } from 'rxjs';
+import { Component, EventEmitter, Output, OnDestroy, OnInit } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { debounceTime, distinctUntilChanged, Subject, Subscription } from 'rxjs';
 
 @Component({
-  selector: 'app-user-searchbar',
+  selector: 'app-searchbar',
   standalone: true,
-  imports: [],
+  imports: [FormsModule],
   templateUrl: './user-searchbar.component.html',
 })
-
-export class UserSearchbarComponent {
+export class UserSearchbarComponent implements OnInit, OnDestroy {
+  searchTerm: string = '';
   @Output() search = new EventEmitter<string>();
-  private searchSubject = new Subject<string>();
 
-  constructor() {
-    this.searchSubject.pipe(
+  private searchSubject = new Subject<string>();
+  private subscription: Subscription = new Subscription();
+
+  ngOnInit(): void {
+    this.subscription = this.searchSubject.pipe(
       debounceTime(300),
       distinctUntilChanged()
-    ).subscribe(searchTerm => {
-      this.search.emit(searchTerm);
+    ).subscribe(term => {
+      this.search.emit(term);
     });
   }
 
-  onSearchInput(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    this.searchSubject.next(input.value);
+  onSearchChange(): void {
+    this.searchSubject.next(this.searchTerm);
+  }
+
+  ngOnDestroy(): void {
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 }

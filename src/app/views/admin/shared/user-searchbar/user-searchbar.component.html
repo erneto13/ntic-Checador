@@ -1,8 +1,3 @@
-<div class="relative">
-    <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">
-        <i class="pi pi-search"></i>
-    </span>
-    <input type="text"
-        class="w-[230px] pl-10 pr-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-slate-300 text-sm text-gray-600"
-        placeholder="Buscar usuario" (input)="onSearchInput($event)" />
-</div>
+<input type="text" [(ngModel)]="searchTerm" (ngModelChange)="onSearchChange()"
+    class="block w-full rounded-md border-0 py-1.5 pl-8 pr-14 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6"
+    placeholder="Buscar..." />

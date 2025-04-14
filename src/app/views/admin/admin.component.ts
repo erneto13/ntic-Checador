@@ -32,20 +32,28 @@ export default class AdminComponent implements OnInit {
   // Datos y estado para usuarios
   allUsers: UserResponse[] = [];
   displayedUsers: UserResponse[] = [];
+
   userToEdit: UserResponse | null = null;
   userModalVisible: boolean = false;
   userEditModalVisible: boolean = false;
 
   allCareers: CareerResponse[] = [];
+  displayedCareers: CareerResponse[] = [];
+
   careerToEdit: CareerResponse | null = null;
   careerModalVisible: boolean = false;
   careerEditModalVisible: boolean = false;
 
-  // Paginación y búsqueda
-  currentPage = 0;
-  pageSize = 5;
-  totalPages = 0;
-  searchTerm = '';
+  currentUsersPage = 0;
+  usersPageSize = 5;
+  usersTotalPages = 0;
+  usersSearchTerm = '';
+
+  // Paginación y búsqueda para carreras
+  currentCareersPage = 0;
+  careersPageSize = 5;
+  careersTotalPages = 0;
+  careersSearchTerm = '';
 
   // Estados de carga
   loadingStates = {
@@ -138,6 +146,7 @@ export default class AdminComponent implements OnInit {
     this.careerService.getAllCareers().subscribe({
       next: (data) => {
         this.allCareers = data;
+        this.filterAndPaginateCareers();
         this.dataLoaded.careers = true;
         this.loadingStates.careers = false;
       },
@@ -154,21 +163,21 @@ export default class AdminComponent implements OnInit {
   }
 
   // Funcionalidades comunes
-  onSearch(searchTerm: string): void {
-    this.searchTerm = searchTerm;
-    this.currentPage = 0;
+  onUsersSearch(searchTerm: string): void {
+    this.usersSearchTerm = searchTerm;
+    this.currentUsersPage = 0;
     this.filterAndPaginateUsers();
   }
 
-  onPageChange(page: number): void {
-    this.currentPage = page;
+  onUsersPageChange(page: number): void {
+    this.currentUsersPage = page;
     this.filterAndPaginateUsers();
   }
 
   filterAndPaginateUsers(): void {
     let filtered = this.allUsers;
-    if (this.searchTerm) {
-      const search = this.searchTerm.toLowerCase();
+    if (this.usersSearchTerm) {
+      const search = this.usersSearchTerm.toLowerCase();
       filtered = this.allUsers.filter(user =>
         user.username.toLowerCase().includes(search) ||
         user.name.toLowerCase().includes(search) ||
@@ -176,9 +185,35 @@ export default class AdminComponent implements OnInit {
       );
     }
 
-    this.totalPages = Math.ceil(filtered.length / this.pageSize);
-    const startIndex = this.currentPage * this.pageSize;
-    this.displayedUsers = filtered.slice(startIndex, startIndex + this.pageSize);
+    this.usersTotalPages = Math.ceil(filtered.length / this.usersPageSize);
+    const startIndex = this.currentUsersPage * this.usersPageSize;
+    this.displayedUsers = filtered.slice(startIndex, startIndex + this.usersPageSize);
+  }
+
+  // Funcionalidades de búsqueda y paginación para carreras
+  onCareersSearch(searchTerm: string): void {
+    this.careersSearchTerm = searchTerm;
+    this.currentCareersPage = 0;
+    this.filterAndPaginateCareers();
+  }
+
+  onCareersPageChange(page: number): void {
+    this.currentCareersPage = page;
+    this.filterAndPaginateCareers();
+  }
+
+  filterAndPaginateCareers(): void {
+    let filtered = this.allCareers;
+    if (this.careersSearchTerm) {
+      const search = this.careersSearchTerm.toLowerCase();
+      filtered = this.allCareers.filter(career =>
+        career.name.toLowerCase().includes(search)
+      );
+    }
+
+    this.careersTotalPages = Math.ceil(filtered.length / this.careersPageSize);
+    const startIndex = this.currentCareersPage * this.careersPageSize;
+    this.displayedCareers = filtered.slice(startIndex, startIndex + this.careersPageSize);
   }
 
   // Métodos para modales
