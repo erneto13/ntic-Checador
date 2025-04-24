@@ -236,6 +236,11 @@ export default class AdminComponent implements OnInit {
     this.careerEditModalVisible = true;
   }
 
+  onCareerCreated(): void {
+    this.loadCareers();
+    this.careerModalVisible = false;
+  }
+
   // Métodos para actualización de datos
   onUserUpdated(updatedUser: UserResponse): void {
     const index = this.allUsers.findIndex(u => u.id === updatedUser.id);
@@ -250,6 +255,7 @@ export default class AdminComponent implements OnInit {
     const index = this.allCareers.findIndex(c => c.id === updatedCareer.id);
     if (index !== -1) {
       this.allCareers[index] = updatedCareer;
+      this.filterAndPaginateCareers();
     }
     this.careerEditModalVisible = false;
   }

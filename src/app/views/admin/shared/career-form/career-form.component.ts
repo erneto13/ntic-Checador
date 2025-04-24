@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CareerResponse } from '../../../../core/interfaces/career';
 import { ToastService } from '../../../../core/services/toast.service';
@@ -11,7 +11,7 @@ import { CareerService } from '../../service/career.service';
   imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './career-form.component.html',
 })
-export class CareerFormComponent {
+export class CareerFormComponent implements OnChanges {
   @Output() careerCreated = new EventEmitter<void>()
   @Output() careerUpdated = new EventEmitter<CareerResponse>()
   @Input() career: CareerResponse | null = null;
@@ -30,6 +30,12 @@ export class CareerFormComponent {
     this.careerForm = this.fb.group({
       name: ['', [Validators.required]],
     })
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['career'] && this.career) {
+      this.patchCareer();
+    }
   }
 
   patchCareer(): void {
@@ -51,12 +57,7 @@ export class CareerFormComponent {
     const formValues = this.careerForm.value
 
     if (this.career) {
-      const careerUpdate: any = {
-        id: this.career.id,
-        name: this.career.name,
-      }
-
-      this.updateCareer(this.career?.id, this.careerUpdated)
+      this.updateCareer(this.career.id, formValues);
 
     } else {
       const newCareer: any = {
@@ -89,10 +90,10 @@ export class CareerFormComponent {
     })
   }
 
-  updateCareer(id: number, updateCareer: any): void {
+  updateCareer(id: number, careerData: any): void {
     const payload = {
-      id: updateCareer.id,
-      name: updateCareer.name,
+      id: id,
+      name: careerData.name,
     };
 
     this.careerService.updateCareer(id, payload).subscribe({
@@ -102,18 +103,18 @@ export class CareerFormComponent {
           'La carrera ha sido actualizada exitosamente',
           'success'
         );
-        this.careerUpdated.emit()
-        this.careerForm.reset()
-        this.initForm()
+        this.careerUpdated.emit(res);
+        this.careerForm.reset();
+        this.initForm();
       },
       error: (e) => {
         this.toastService.showToast(
           'Ocurrio un error',
           'No se logro actualizar la carrera',
           'error'
-        )
+        );
       }
-    })
+    });
   }
 
 }
