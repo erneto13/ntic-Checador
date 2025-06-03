@@ -27,7 +27,6 @@ export class ScheduleFormComponent {
   constructor(
     private fb: FormBuilder,
     private scheduleService: ScheduleService,
-    private professorService: ClassroomService,
     private toastService: ToastService,
   ) {
     this.scheduleForm = this.fb.group({
@@ -39,11 +38,6 @@ export class ScheduleFormComponent {
   }
 
   ngOnInit(): void {
-    this.loadProfessors();
-
-    if (this.scheduleId) {
-      this.loadSchedule(this.scheduleId);
-    }
   }
 
   private timeValidator(group: FormGroup): { [key: string]: any } | null {
@@ -54,35 +48,6 @@ export class ScheduleFormComponent {
       return start >= end ? { 'timeConflict': true } : null;
     }
     return null;
-  }
-
-  loadProfessors(): void {
-    this.professorService.getAllProfessors().subscribe(
-      professors => this.professors = professors,
-      error => this.toastService.showToast(
-        'Error',
-        'No se pudieron cargar los profesores',
-        'error'
-      )
-    );
-  }
-
-  loadSchedule(id: number): void {
-    this.scheduleService.getScheduleById(id).subscribe(
-      schedule => {
-        this.scheduleForm.patchValue({
-          professor: schedule.professor,
-          day: schedule.day,
-          startTime: schedule.startTime,
-          endTime: schedule.endTime
-        });
-      },
-      error => this.toastService.showToast(
-        'Error',
-        'No se pudo cargar el horario',
-        'error'
-      )
-    );
   }
 
   onSubmit(): void {

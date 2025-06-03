@@ -1,142 +1,126 @@
 import { Component, OnInit } from '@angular/core';
-import { Classroom, ClassroomResponse } from '../../core/interfaces/classroom';
+import { CommonModule } from '@angular/common';
+import { DialogModule } from 'primeng/dialog';
+import { ClassroomResponse } from '../../core/interfaces/classroom';
+import { Group } from '../../core/interfaces/groups';
+import { ClassroomService } from './service/classroom-service.service';
+import { GroupsService } from './service/groups.service';
+import { ToastService } from '../../core/services/toast.service';
+import { ToastComponent } from '../../shared/toast/toast.component';
 import { ClassroomFormComponent } from './shared/classroom-form/classroom-form.component';
 import { ClassroomCardComponent } from './shared/classroom-card/classroom-card.component';
-import { CommonModule } from '@angular/common';
-import { ClassroomService } from './service/classroom-service.service';
-import { DialogModule } from 'primeng/dialog';
-import { ToastComponent } from '../../shared/toast/toast.component';
-import { ToastService } from '../../core/services/toast.service';
-import { AssignTabComponent } from './shared/assign-tab/assign-tab.component';
-import { ScheduleTabComponent } from './shared/schedule-tab/schedule-tab.component';
 import { ClassroomDetailsComponent } from './shared/classroom-details/classroom-details.component';
-import { ChartsComponent } from "../../shared/charts/charts.component";
+import { GroupCardComponent } from './shared/group-card/group-card.component';
 
 @Component({
-  selector: 'app-classroom-management',
+  selector: 'app-academic-management',
   standalone: true,
   imports: [
-    ClassroomFormComponent,
-    ClassroomCardComponent,
     CommonModule,
     DialogModule,
     ToastComponent,
+    ClassroomFormComponent,
+    ClassroomCardComponent,
     ClassroomDetailsComponent,
-],
+    GroupCardComponent
+  ],
   templateUrl: './classroom-management.component.html',
 })
-export default class ClassroomManagementComponent implements OnInit {
+export default class ClassroomManagement implements OnInit {
+  // Data properties
   classrooms: ClassroomResponse[] = [];
-  selectedClassroom?: Classroom;
-  selectedClassroomDetails?: ClassroomResponse;
+  groups: Group[] = [];
 
-  showPanel = false;
-  showModal = false;
-  showEditModal = false;
+  // Selected items
+  selectedItem?: ClassroomResponse | Group;
+  selectedItemDetails?: ClassroomResponse | Group;
+
+  // UI State properties
+  activeTab: 'groups' | 'classrooms' = 'groups';
+  showFormModal = false;
   showDetailsModal = false;
+  isEditMode = false;
+  formType: 'classroom' | 'group' = 'classroom';
 
   constructor(
-    private courseService: ClassroomService,
+    private classroomService: ClassroomService,
+    private groupService: GroupsService,
     private toastService: ToastService
   ) { }
 
   ngOnInit(): void {
+    this.loadInitialData();
+  }
+
+  // ========================
+  // DATA LOADING METHODS
+  // ========================
+  private loadInitialData(): void {
+    this.loadGroups();
     this.loadClassrooms();
   }
 
-  openClassroomMenu(classroom: ClassroomResponse) {
-    this.selectedClassroom = this.toClassroom(classroom);
-    this.showEditModal = true;
+  private loadGroups(): void {
+    this.groupService.getAllGroups().subscribe({
+      next: (data) => this.groups = data,
+      error: () => this.showErrorToast('Error', 'No se pudieron cargar los grupos')
+    });
   }
 
-  openModal() {
-    this.showModal = true;
+  private loadClassrooms(): void {
+    this.classroomService.getAllClassRooms().subscribe({
+      next: (data) => this.classrooms = data,
+      error: () => this.showErrorToast('Error', 'No se pudieron cargar las aulas')
+    });
   }
 
-  closePanel() {
-    this.showPanel = false;
+  // ========================
+  // MODAL MANAGEMENT
+  // ========================
+  openCreateModal(type: 'classroom' | 'group'): void {
+    this.formType = type;
+    this.isEditMode = false;
+    this.selectedItem = undefined;
+    this.showFormModal = true;
   }
 
-  assignClass(event: any) {
-    console.log('Asignando clase:', event);
+  openEditModal(item: ClassroomResponse | Group): void {
+    this.selectedItem = item;
+    this.formType = item.hasOwnProperty('capacity') ? 'classroom' : 'group';
+    this.isEditMode = true;
+    this.showFormModal = true;
   }
 
-  toClassroom(response: ClassroomResponse): Classroom {
-    return {
-      id: response.id,
-      name: response.name,
-      groupCode: response.groupCode,
-      description: response.description,
-      classroom: response.classroom,
-      professor: response.professor ? { id: response.professor.id } : undefined,
-      professor_id: response.professor_id
-    };
-  }
-
-  onAssignment(classroom: ClassroomResponse) {
-    this.selectedClassroomDetails = classroom;
+  openDetailsModal(item: ClassroomResponse | Group): void {
+    this.selectedItemDetails = item;
     this.showDetailsModal = true;
   }
 
-  openEditFromDetails() {
-    if (this.selectedClassroomDetails) {
-      this.selectedClassroom = this.toClassroom(this.selectedClassroomDetails);
-      this.showDetailsModal = false;
-      this.showEditModal = true;
+  closeModal(): void {
+    this.showFormModal = false;
+    this.showDetailsModal = false;
+  }
+
+  // ========================
+  // CRUD OPERATIONS
+  // ========================
+  onFormSubmit(): void {
+    this.closeModal();
+    if (this.formType === 'classroom') {
+      this.loadClassrooms();
+    } else {
+      this.loadGroups();
     }
   }
 
-  loadClassrooms() {
-    this.courseService.getAllCourse().subscribe({
-      next: (data) => {
-        this.classrooms = data;
-        this.showModal = false;
-        console.log('Salones cargados:', this.classrooms);
-      },
-      error: (error) => {
-        this.showModal = false;
-        console.error('Error al cargar los salones:', error);
-      }
-    });
+  // ========================
+  // UTILITY METHODS
+  // ========================
+  private showSuccessToast(title: string, message: string): void {
+    this.toastService.showToast(title, message, 'success');
   }
 
-  deleteClassroom(classroom: ClassroomResponse) {
-    this.courseService.deleteCourse(classroom.id).subscribe({
-      next: () => {
-        this.classrooms = this.classrooms.filter(c => c.id !== classroom.id);
-        this.toastService.showToast(
-          'Grupo eliminado',
-          `El grupo ${classroom.name} ha sido eliminada correctamente.`,
-          'success',
-        );
-      },
-      error: (error) => {
-        this.toastService.showToast(
-          'Error al eliminar el grupo',
-          `No se pudo eliminar el grupo ${classroom.name}.`,
-          'error',
-        );
-      }
-    });
-  }
-
-  onClassroomCreated() {
-    this.loadClassrooms();
-    this.showModal = false;
-  }
-
-  onClassroomUpdated() {
-    this.loadClassrooms();
-    this.showEditModal = false;
-  }
-
-  onEditCancel() {
-    this.showModal = false;
-    this.showEditModal = false;
-  }
-
-  onCreateSchedule() {
-    this.showDetailsModal = false;
-    this.loadClassrooms();
+  private showErrorToast(title: string, message: string): void {
+    this.toastService.showToast(title, message, 'error');
   }
 }

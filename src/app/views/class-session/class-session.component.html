@@ -1,0 +1,43 @@
+<div class="container mx-auto pl-40 pr-4 mt-10 min-h-screen bg-gray-50">
+    <div class="mb-6 flex items-center justify-between">
+        <h2 class="text-2xl font-bold text-gray-800">Horarios</h2>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div class="cursor-pointer hover:scale-[1.02] transition-transform duration-200">
+            @for (classSession of classSessions; track $index) {
+            <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+                <div class="flex items">
+                    <div class="h-16 w-16 rounded-full bg-blue-50 flex items-center justify-center mr-4">
+                        <i class="pi pi-calendar text-blue-600 text-4xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-800">{{ classSession.classRoom?.name }}</h3>
+                        <p class="text-gray-600">{{ classSession.dayOfWeek }}</p>
+                    </div>
+                </div>
+            </div>
+            }
+        </div>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+        <div class="md:col-span-2 lg:col-span-3 flex justify-start">
+            <div class="bg-white max-w-sm rounded-xl border border-gray-100 shadow-sm p-6 text-center">
+                <div class="flex justify-center mb-4">
+                    <div class="h-16 w-16 rounded-full bg-blue-50 flex items-center justify-center">
+                        <i class="pi pi-users text-blue-600 text-4xl"></i>
+                    </div>
+                </div>
+                <h2 class="text-xl font-bold text-gray-800 mb-2">No hay grupos registrados</h2>
+                <button class="mt-4 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg">
+                    <i class="pi pi-plus mr-2"></i>
+                    Crear nuevo grupo
+                </button>
+            </div>
+        </div>
+    </div>
+
+
+    <app-toast />
+</div>

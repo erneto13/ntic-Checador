@@ -1,1 +1,31 @@
-<p>subjects-form works!</p>
+<div class="lg:col-span-1 bg-white">
+    <form [formGroup]="subjectForm" (ngSubmit)="onSubmit()">
+        <div class="p-2 space-y-4">
+            <div class="space-y-2">
+                <label class="text-sm font-medium">Materia</label>
+                <input formControlName="name" placeholder="Ej: Graficación"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+            </div>
+
+            <div class="space-y-2">
+                <label class="text-sm font-medium">Carrera</label>
+                <app-dropdown [options]="careers" formControlName="career_id" [displayField]="'name'"
+                    [valueField]="'id'" [placeholder]="'Seleccione una carrera'">
+                </app-dropdown>
+            </div>
+        </div>
+
+        <div class="p-6 border-t flex gap-2">
+            <button type="button" (click)="subjectForm.reset()"
+                class="w-full px-4 py-2 text-sm font-medium border border-gray-300 rounded-md flex items-center justify-center gap-2 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <i class="pi pi-times" style="font-size: 0.8rem"></i>
+                Limpiar
+            </button>
+            <button type="submit"
+                class="w-full px-4 py-2 text-sm font-medium bg-blue-600 text-white rounded-md flex items-center justify-center gap-2 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <i class="pi pi-plus" style="font-size: 0.8rem"></i>
+                {{ subject ? 'Actualizar Materia' : 'Crear Materia' }}
+            </button>
+        </div>
+    </form>
+</div>

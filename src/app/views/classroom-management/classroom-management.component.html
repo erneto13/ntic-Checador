@@ -1,82 +1,90 @@
-<div class="container mx-auto pl-40 pr-4 mt-10">
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        @if (classrooms.length > 0) {
-        @for (classroom of classrooms; track $index) {
-        <div (click)="onAssignment(classroom)"
-            class="cursor-pointer hover:scale-[1.02] transition-transform duration-200">
-            <app-classroom-card [classroom]="classroom" (onClick)="openClassroomMenu(classroom)"
-                (onEdit)="openClassroomMenu(classroom)" (onDelete)="deleteClassroom(classroom)">
-            </app-classroom-card>
-        </div>
-        }
-        } @else {
-        <div class="md:col-span-2 lg:col-span-3 flex justify-start">
-            <div
-                class="bg-white max-w-sm rounded-xl border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden relative">
-                <div class="bg-gradient-to-r from-blue-500 to-blue-600 h-2 w-full"></div>
+<div class="container mx-auto px-4 md:px-6 mt-10 min-h-screen p-6 w-full max-w-6xl">
+    <!-- Añadido pl-20 para el padding izquierdo -->
+    <div class="mb-8">
+        <h2 class="text-2xl font-bold text-gray-800 mb-2">Gestión Académica</h2>
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div class="flex space-x-2 bg-gray-100 p-1 rounded-lg">
+                <button (click)="activeTab = 'groups'" [class]="activeTab === 'groups' ? 
+                          'px-4 py-2 rounded-md bg-white shadow text-blue-600 font-medium' : 
+                          'px-4 py-2 rounded-md text-gray-600 hover:bg-gray-50 transition-colors'">
+                    <i class="pi pi-users mr-2"></i> Grupos
+                </button>
+                <button (click)="activeTab = 'classrooms'" [class]="activeTab === 'classrooms' ? 
+                          'px-4 py-2 rounded-md bg-white shadow text-blue-600 font-medium' : 
+                          'px-4 py-2 rounded-md text-gray-600 hover:bg-gray-50 transition-colors'">
+                    <i class="pi pi-building mr-2"></i> Aulas
+                </button>
+            </div>
 
-                <div class="p-6 text-center">
+            <button (click)="openCreateModal(activeTab === 'groups' ? 'group' : 'classroom')"
+                class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors flex items-center">
+                <i class="pi pi-plus mr-2"></i>
+                {{ activeTab === 'groups' ? 'Nuevo Grupo' : 'Nueva Aula' }}
+            </button>
+        </div>
+    </div>
+
+    <div class="space-y-8 pr-4">
+        @if (activeTab === 'groups') {
+        <div class="space-y-6">
+            <h3 class="text-xl font-semibold text-gray-700">Listado de Grupos</h3>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                @if (groups.length > 0) {
+                @for (group of groups; track $index) {
+                <app-group-card [group]="group" (edit)="openEditModal(group)" (details)="openDetailsModal(group)">
+                </app-group-card>
+                }
+                } @else {
+                <div
+                    class="bg-white rounded-xl border border-gray-100 shadow-sm p-8 text-center md:col-span-2 lg:col-span-3">
                     <div class="flex justify-center mb-4">
                         <div class="h-16 w-16 rounded-full bg-blue-50 flex items-center justify-center">
-                            <i class="pi pi-book text-blue-600 text-4xl"></i>
+                            <i class="pi pi-users text-blue-600 text-4xl"></i>
                         </div>
                     </div>
-
-                    <h2 class="text-xl font-bold text-gray-800 mb-2">No hay aulas registradas</h2>
-                    <p class="text-sm text-gray-600 mb-4">Parece que aún no has creado o no tienes acceso a ninguna
-                        aula.</p>
-
-                    <button (click)="openModal()"
-                        class="mt-4 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors duration-200 flex items-center justify-center mx-auto">
-                        <i class="pi pi-plus mr-2"></i>
-                        Crear nueva aula
+                    <h2 class="text-xl font-bold text-gray-800 mb-2">No hay grupos registrados</h2>
+                    <p class="text-gray-600 mb-4">Comienza creando tu primer grupo</p>
+                    <button (click)="openCreateModal('group')"
+                        class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
+                        Crear Grupo
                     </button>
-
-                    <div class="mt-6 pt-4 border-t border-gray-100">
-                        <p class="text-xs text-gray-500">¿Necesitas ayuda?</p>
-                        <p class="text-sm font-medium text-gray-700">Usa el código de grupo para unirte a un aula
-                            existente</p>
-                    </div>
                 </div>
+                }
+            </div>
+        </div>
+        }
+
+        @if (activeTab === 'classrooms') {
+        <div class="space-y-6">
+            <h3 class="text-xl font-semibold text-gray-700">Listado de Aulas</h3>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                @if (classrooms.length > 0) {
+                @for (classroom of classrooms; track $index) {
+                <app-classroom-card [classroom]="classroom" (edit)="openEditModal(classroom)"
+                    (details)="openDetailsModal(classroom)" />
+                }
+                } @else {
+                <div
+                    class="bg-white rounded-xl border border-gray-100 shadow-sm p-8 text-center md:col-span-2 lg:col-span-3">
+                    <div class="flex justify-center mb-4">
+                        <div class="h-16 w-16 rounded-full bg-blue-50 flex items-center justify-center">
+                            <i class="pi pi-building text-blue-600 text-4xl"></i>
+                        </div>
+                    </div>
+                    <h2 class="text-xl font-bold text-gray-800 mb-2">No hay aulas registradas</h2>
+                    <p class="text-gray-600 mb-4">Comienza creando tu primera aula</p>
+                    <button (click)="openCreateModal('classroom')"
+                        class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
+                        Crear Aula
+                    </button>
+                </div>
+                }
             </div>
         </div>
         }
     </div>
-
-    <!-- modal para agregar -->
-    <p-dialog header="Agregar grupo" [draggable]="false" [modal]="true" [(visible)]="showModal"
-        [style]="{ width: '30rem' }">
-        <app-classroom-form (classroomCreated)="loadClassrooms()" (onCancel)="onEditCancel()"></app-classroom-form>
-    </p-dialog>
-
-    <!-- modal para editar -->
-    <p-dialog [header]="selectedClassroom ? 'Editar grupo' : 'Agregar grupo'" [draggable]="false" [modal]="true"
-        [(visible)]="showEditModal" [style]="{ width: '30rem' }">
-        @if (selectedClassroom) {
-        <app-classroom-form [classroom]="selectedClassroom" (classroomCreated)="onClassroomCreated()"
-            (classroomUpdated)="onClassroomUpdated()" (onCancel)="onEditCancel()">
-        </app-classroom-form>
-        }
-    </p-dialog>
-
-    <!-- modal para detalles del aula -->
-    <p-dialog header="Detalles del Aula" [draggable]="false" [modal]="true" [(visible)]="showDetailsModal"
-        [style]="{ width: '65rem' }">
-        @if (selectedClassroomDetails) {
-        <app-classroom-details [classroom]="selectedClassroomDetails" (scheduleCreated)="onCreateSchedule()">
-        </app-classroom-details>
-        }
-    </p-dialog>
-
-    <!-- si no hay no se muestra el boton -->
-    @if (classrooms.length > 0) {
-    <div class="fixed bottom-8 right-8">
-        <button (click)="openModal()"
-            class="bg-blue-600 text-white p-4 rounded-full shadow-lg hover:bg-blue-700 transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
-            <i class="pi pi-plus"></i>
-        </button>
-    </div>
-    }
 
     <app-toast />
 </div>
