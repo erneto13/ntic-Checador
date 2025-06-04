@@ -11,12 +11,20 @@ export const routes: Routes = [
         canActivate: [AuthGuard],
         children: [
             {
+                path: 'v1/admin/inicio',
+                loadComponent: () => import('./views/dashboard/dashboard.component'),
+            },
+            {
                 path: 'v1/admin/principal',
                 loadComponent: () => import('./views/admin/admin.component'),
             },
             {
                 path: 'v1/grupos',
                 loadComponent: () => import('./views/classroom-management/classroom-management.component'),
+            },
+            {
+                path: 'v1/admin/reportes',
+                loadComponent: () => import('./views/reports/reports.component'),
             },
             {
                 path: 'v1/asistencia',

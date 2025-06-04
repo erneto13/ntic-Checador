@@ -1,0 +1,74 @@
+<!-- Vista de Horario Semanal Optimizado -->
+<div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+    <div class="grid grid-cols-6 gap-0">
+        <div class="bg-gray-100 p-3 border-r border-gray-200 font-medium text-gray-700 text-center">
+            Horario
+        </div>
+        @for (day of weekDays; track day) {
+        <div class="bg-gray-100 p-3 border-r border-gray-200 last:border-r-0 font-medium text-gray-700 text-center">
+            {{ day }}
+        </div>
+        }
+
+        @for (slot of scheduleSlots; track slot.startTime) {
+        <div class="p-3 border-r border-b border-gray-200 bg-gray-50 text-sm font-medium text-gray-600 text-center">
+            <div class="text-xs text-gray-500 mb-1">{{ slot.startTime }}</div>
+            <div class="text-xs text-gray-400">{{ slot.endTime }}</div>
+        </div>
+
+        @for (day of weekDays; track day) {
+        <div class="p-2 border-r border-b border-gray-200 last:border-r-0 min-h-[100px] relative">
+            @if (getPrimaryClassForSlot(day, slot)) {
+            @let primaryClass = getPrimaryClassForSlot(day, slot);
+            <div class="h-full rounded-lg p-3 transition-colors cursor-pointer group relative"
+                [class]="getClassColor(primaryClass?.subject?.name)">
+
+                <button
+                    class="absolute top-1 right-1 bg-red-500 hover:bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10"
+                    (click)="stopPropagation($event); deleteClassSession(primaryClass!)" title="Eliminar clase">
+                    <i class="pi pi-times text-xs"></i>
+                </button>
+
+                <div class="font-semibold text-sm text-gray-800 mb-2 pr-6">
+                    {{ primaryClass?.subject?.name || 'Sin materia' }}
+                </div>
+
+                <div class="text-xs text-gray-600 mb-2 bg-white bg-opacity-60 rounded px-2 py-1">
+                    {{ primaryClass?.startTime }} - {{ primaryClass?.endTime }}
+                </div>
+
+                <div class="text-xs text-gray-600 mb-1 flex items-center">
+                    <i class="pi pi-user text-xs mr-1"></i>
+                    <span class="truncate">{{ primaryClass?.professor?.name || 'Sin profesor' }}</span>
+                </div>
+
+                <div class="text-xs text-gray-600 mb-2 flex items-center">
+                    <i class="pi pi-map-marker text-xs mr-1"></i>
+                    <span class="truncate">{{ primaryClass?.classRoom?.name || 'Sin aula' }}</span>
+                </div>
+
+                @if (getClassForDayAndTimeSlot(day, slot).length > 1) {
+                <div
+                    class="absolute top-1 left-1 bg-orange-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
+                    {{ getClassForDayAndTimeSlot(day, slot).length }}
+                </div>
+                }
+            </div>
+            } @else {
+            <div class="h-full flex items-center justify-center text-gray-400 text-xs">
+                Libre
+            </div>
+            }
+        </div>
+        }
+        }
+    </div>
+
+    @if (scheduleSlots.length === 0) {
+    <div class="p-8 text-center text-gray-500">
+        <i class="pi pi-calendar-times text-4xl mb-4 text-gray-300"></i>
+        <p class="text-lg font-medium mb-2">No hay clases programadas</p>
+        <p class="text-sm">Agrega algunas sesiones de clase para ver el horario.</p>
+    </div>
+    }
+</div>

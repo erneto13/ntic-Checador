@@ -1,4 +1,4 @@
 export const environment = { 
     production: true,
-    apiUrl: 'http://localhost:8080'
+    apiUrl: 'http://ntic-checadorbackend-production-6448.up.railway.app/api/v1'
 };

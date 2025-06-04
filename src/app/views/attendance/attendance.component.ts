@@ -1,335 +1,178 @@
+import { Component, OnInit } from '@angular/core';
+import { DropdownComponent } from "../../shared/dropdown/dropdown.component";
+import { DayOfWeek, HourOfDay } from '../../core/interfaces/attendance';
+import { ClassSessionService } from '../class-session/services/class-session.service';
+import { ToastService } from '../../core/services/toast.service';
+import { ClassSession } from '../../core/interfaces/groups';
+import { AuthService } from '../../auth/service/auth.service';
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
-import { FormsModule } from '@angular/forms';
-import { Classroom, Professor } from '../../core/interfaces/classroom';
-import { Checker, Course, Schedule, Supervisor } from '../../core/interfaces/schedule';
-import { ScheduleService } from '../admin/service/schedules.service';
-import { ClassroomService } from '../classroom-management/service/classroom-service.service';
-import { AttendanceService } from '../admin/service/attendance.service';
-import { Attendance } from '../../core/interfaces/attendance';
-import { UserService } from '../admin/service/user.service';
-import { Role, User, UserResponse } from '../../core/interfaces/user';
-import { ResponseDto } from '../../core/interfaces/responses';
+import { ToastComponent } from "../../shared/toast/toast.component";
+import { ClassSessionAttendanceComponent } from "./shared/class-session-attendance/class-session-attendance.component";
+import { DialogModule } from 'primeng/dialog';
+import { AttendanceDetailsComponent } from "./shared/attendance-details/attendance-details.component";
 
 @Component({
   selector: 'app-attendance',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [
+    CommonModule,
+    DropdownComponent,
+    ToastComponent,
+    ClassSessionAttendanceComponent,
+    DialogModule,
+    AttendanceDetailsComponent
+],
   templateUrl: './attendance.component.html',
 })
-export default class AttendanceComponent {
-  // Pestañas principales
-  activeMainTab: 'classrooms' | 'attendance' | 'syllabus' = 'attendance';
+export default class AttendanceComponent implements OnInit {
+  daysOfWeek: any[] = [];
+  hoursOfDay: any[] = [];
+  selectedDay: string = '';
+  selectedHour: string = '';
+  classSessions: ClassSession[] = [];
+  isLoading = false;
+  role: string = '';
 
-  // Datos de filtros para asistencias
-  selectedGroup: number = 0;
-  selectedDate: string = new Date().toISOString().split('T')[0]; // Fecha actual en formato YYYY-MM-DD
-  currentChecker: User = {
-    id: 0,
-    username: '',
-    email: '',
-    name: '',
-    role: {} as Role,
-    password: '',
-  };
-  currentUserRole: string = ""; // Obtener el rol del usuario actual
-  currentSupervisor: number = 0;
-  groupSchedules: Schedule[] = [];
-  groups: Classroom[] = [];
-  supervisors: Supervisor[] = [
-    { id: 1,
-      name: "Supervisor 1",
-      username: "212312-2",
-      email: "correo@gmail.com",
-      password: "pass",
-      roleName: "supervisor" },
-  ];
-  professorsList: Professor[] = [];
-  // Datos para mostrar en asistencias
-  selectedGroupName: string = '';
-  selectedGroupClassroom: string = '';
-  // Datos de asistencia
-  attendanceList: boolean[] = [];
-  // Datos para temarios
-  selectedProfessor: string = '';
-  selectedCourse: string = '';
-  selectedPeriod: string = 'current';
-  courseSessions: any[] = [];
-  selectedSession: any = null;
+  // Modal control
+  showAttendanceModal = false;
+  selectedClassSession: ClassSession | null = null;
 
-  // Alerta
-  showAlert: boolean = false;
-  alertType: 'success' | 'error' = 'success';
-  alertTitle: string = '';
-  alertMessage: string = '';
-  constructor(private schedulesService: ScheduleService,
-    private courseService: ClassroomService,
-    private attendanceService: AttendanceService,
-    private userService: UserService) { }
+  constructor(
+    private classSessionService: ClassSessionService,
+    private authService: AuthService,
+    private toastService: ToastService
+  ) { }
 
   ngOnInit(): void {
-    // Cargar datos iniciales
-    this.loadGroupSchedule();
+    this.initializeDropdowns();
+    this.loadUserRole();
   }
 
-  // Métodos para la pestaña de Asistencias
-  loadGroupSchedule(): void {
-    this.userService.getUserByUserName(this.userService.getUserName()).subscribe({
-      next: (response) => {
-        this.currentChecker = response;
-      },
-      error: (error) => {
-        console.error('Error al obtener el supervisor:', error);
-        this.showErrorAlert(
-          'Error al registrar asistencia',
-          'No se pudo obtener el supervisor. Por favor intente nuevamente.'
-        );
-      }
-    });
-    this.currentUserRole = this.userService.getUserRole();
-    this.loadProfessorCourses();
-    if (!this.selectedGroup) {
-      this.groupSchedules = [];
-      this.selectedGroupName = '';
-      this.selectedGroupClassroom = '';
-      return;
-    }
-    this.groupSchedules = [];
-    this.selectedGroupName = '';
-    this.selectedGroupClassroom = '';
-    this.attendanceList = [];
-    this.schedulesService.getSchedulesByCourse(this.selectedGroup).subscribe({
-      next: (response) => {
-        this.groupSchedules = response;
-        console.log('Horarios del grupo:', this.groupSchedules);
-        this.groupSchedules.forEach(schedule => {
-          this.checkAttendanceToday(schedule);
-        })
-        console.log(this.attendanceList);
-      }
-    })
-    // Encontrar el grupo seleccionado
-    //Esta mamada no estaba funcionando pq el id del numero estaba como "id?" xDD convirtiendo el id a number ya jala 🙉
-    const group = this.groups.find(group => group.id === Number(this.selectedGroup));
-    if (group) {
-      this.selectedGroupName = group.name;
-      this.selectedGroupClassroom = group.classroom;
-      console.log("Founded Group", group);
+  private loadUserRole(): void {
+    const role = this.authService.getRoleFromToken();
+    if (role) {
+      this.role = role;
+    } else {
+      console.warn('No se pudo obtener el rol desde el token.');
+      this.toastService.showToast(
+        'Advertencia',
+        'No se pudo verificar tu rol de usuario',
+        'info'
+      );
     }
   }
 
-  confirmAttendance(scheduleId: number, present: boolean): void {
-    const schedule = this.groupSchedules.find(schedule => schedule.id === scheduleId);
+  initializeDropdowns(): void {
+    this.daysOfWeek = Object.entries(DayOfWeek).map(([key, value]) => ({
+      name: value,
+      value
+    }));
 
-    if (!schedule) {
-      console.error('Schedule not found for the given ID.');
-      this.showErrorAlert(
-        'Error al registrar asistencia',
-        'No se encontró el horario correspondiente. Por favor intente nuevamente.'
+    this.hoursOfDay = Object.entries(HourOfDay).map(([key, value]) => ({
+      name: value,
+      value
+    }));
+  }
+
+  onDaySelected(day: any): void {
+    this.selectedDay = day.value;
+    if (this.selectedDay && this.selectedHour) {
+      this.loadClassSessions();
+    }
+  }
+
+  onHourSelected(hour: any): void {
+    this.selectedHour = hour.value;
+    if (this.selectedDay && this.selectedHour) {
+      this.loadClassSessions();
+    }
+  }
+
+  loadClassSessions(): void {
+    if (!this.selectedDay || !this.selectedHour) {
+      this.toastService.showToast(
+        'Filtros requeridos',
+        'Por favor, selecciona un día y una hora para buscar clases.',
+        'info'
       );
       return;
     }
-    const attendance: Attendance = {
-      professor: schedule.professor,
-      course: schedule.course,
-      date: this.selectedDate,
-      checkInTime: schedule.startTime,
-      checkOutTime: schedule.endTime,
-      weeklyTopic: "",
-      present: present,
-      checker: this.currentChecker,
-      checker_type: this.currentUserRole,
-    };
-    console.log(attendance);
-    console.log('Asistencia:', attendance);
-    this.attendanceService.createAttendance(attendance).subscribe({
-      next: (response) => {
-        console.log('Asistencia registrada:', response);
-        this.showSuccessAlert(
-          'Asistencia registrada',
-          `La asistencia ha sido registrada correctamente.`
-        );
-        // Update attendanceList immediately
-        const scheduleIndex = this.groupSchedules.findIndex(s => s.id === scheduleId);
-        if (scheduleIndex !== -1) {
-          this.attendanceList[scheduleIndex] = true; // Or your logic to mark it as registered
-        }
+
+    if (this.daysOfWeek.length === 0 || this.hoursOfDay.length === 0) {
+      this.initializeDropdowns();
+    }
+
+    this.isLoading = true;
+    this.classSessions = [];
+
+    this.classSessionService.getClassSessionsByDayAndTime(this.selectedDay, this.selectedHour).subscribe({
+      next: (sessions) => {
+        this.classSessions = sessions;
+        this.isLoading = false;
       },
-      error: (error) => {
-        console.error('Error al registrar asistencia:', error);
-        this.showErrorAlert(
-          'Error al registrar asistencia',
-          `No se pudo registrar la asistencia. Por favor intente nuevamente.`
+      error: (err) => {
+        console.error('Error loading class sessions:', err);
+        this.toastService.showToast(
+          'Error al cargar sesiones',
+          'No se pudieron cargar las sesiones de clase. Por favor, inténtalo de nuevo.',
+          'error'
         );
+        this.isLoading = false;
+      },
+      complete: () => {
+        if (this.classSessions.length === 0) {
+          this.toastService.showToast(
+            'Sin resultados',
+            'No se encontraron clases para el día y hora seleccionados.',
+            'info'
+          );
+        } else {
+          this.toastService.showToast(
+            'Clases cargadas',
+            `Se encontraron ${this.classSessions.length} clase(s).`,
+            'success'
+          );
+        }
       }
     });
-    /*
-    this.showSuccessAlert(
-      'Registro exitoso',
-      `Se ha registrado la ${status} del profesor ${schedule.professor} para la clase de ${schedule.subject} a las ${schedule.time} por ${supervisor}.`
-    );
-  */
-    // En una aplicación real, aquí enviarías los datos al servidor
   }
 
-  // Métodos para la pestaña de Programar Temarios
-  loadProfessorCourses(): void {
-    // En una aplicación real, aquí cargarías los datos del servidor
-    if (!this.selectedProfessor) {
-      this.courseService.getAllCourse().subscribe({
-        next: (response) => {
-          console.log('Cursos del profesor:', this.groups);
-          this.groups = response;
-          this.selectedCourse = '';
-          this.courseSessions = [];
-          this.selectedSession = null;
-        },
-        error: (error) => {
-          console.error('Error al cargar los cursos:', error);
-          this.groups = [];
-        }
-      })
-      return;
-    }
-  }
-  public checkAttendanceToday(schedule: Schedule): void {
-
-    this.attendanceService.attendanceToday(schedule.professor.id, schedule.course.id).subscribe({
-      next: (res) => {
-        this.attendanceList.push(res.response);
-      }, error: (error) => {
-        console.error('Error al cargar los cursos:', error);
-      }
-    })
-  }
-  loadCourseSessions(): void {
-    // En una aplicación real, aquí cargarías los datos del servidor
-    if (!this.selectedCourse) {
-      this.courseSessions = [];
-      this.selectedSession = null;
-      return;
-    }
-
-    // Datos de ejemplo para las sesiones del curso
-    this.courseSessions = [
-      {
-        id: 'session1',
-        title: 'Introducción a la materia',
-        date: '2025-03-25',
-        objectives: 'Conocer los conceptos básicos de la materia y su aplicación en el mundo real.',
-        topics: '- Presentación del curso\n- Conceptos fundamentales\n- Aplicaciones prácticas',
-        materials: 'Libro de texto, presentaciones, artículos científicos',
-        activities: 'Discusión grupal, ejercicios prácticos',
-        status: 'completed'
-      },
-      {
-        id: 'session2',
-        title: 'Fundamentos teóricos',
-        date: '2025-04-01',
-        objectives: 'Comprender los fundamentos teóricos que sustentan la materia.',
-        topics: '- Teorías principales\n- Modelos conceptuales\n- Evolución histórica',
-        materials: 'Capítulos 2 y 3 del libro de texto, videos educativos',
-        activities: 'Análisis de casos, presentaciones individuales',
-        status: 'in-progress'
-      },
-      {
-        id: 'session3',
-        title: 'Aplicaciones prácticas',
-        date: '2025-04-08',
-        objectives: 'Aplicar los conocimientos teóricos en situaciones prácticas.',
-        topics: '- Metodologías de aplicación\n- Herramientas tecnológicas\n- Casos de estudio',
-        materials: 'Software especializado, guías de laboratorio',
-        activities: 'Proyecto en equipo, demostraciones prácticas',
-        status: 'planned'
-      }
-    ];
-  }
-
-  selectSession(session: any): void {
-    // Crear una copia para no modificar directamente el original
-    this.selectedSession = JSON.parse(JSON.stringify(session));
-  }
-
-  createNewSession(): void {
-    const today = new Date().toISOString().split('T')[0];
-
-    this.selectedSession = {
-      id: 'new-session-' + Date.now(),
-      title: 'Nueva Sesión',
-      date: today,
-      objectives: '',
-      topics: '',
-      materials: '',
-      activities: '',
-      status: 'planned'
-    };
-  }
-
-  saveSession(): void {
-    // Validar campos obligatorios
-    if (!this.selectedSession.title || !this.selectedSession.date) {
-      this.showErrorAlert('Campos incompletos', 'Por favor complete al menos el título y la fecha de la sesión.');
-      return;
-    }
-
-    // En una aplicación real, aquí enviarías los datos al servidor
-
-    // Actualizar la lista de sesiones
-    const index = this.courseSessions.findIndex(s => s.id === this.selectedSession.id);
-    if (index >= 0) {
-      // Actualizar sesión existente
-      this.courseSessions[index] = JSON.parse(JSON.stringify(this.selectedSession));
-    } else {
-      // Añadir nueva sesión
-      this.courseSessions.push(JSON.parse(JSON.stringify(this.selectedSession)));
-    }
-
-    this.showSuccessAlert(
-      'Sesión guardada',
-      `La sesión "${this.selectedSession.title}" ha sido guardada correctamente.`
+  onStudentListClick(classSession: ClassSession): void {
+    console.log('Ver lista de estudiantes para:', classSession);
+    // TODO: Implementar modal de lista de estudiantes
+    this.toastService.showToast(
+      'Funcionalidad pendiente',
+      'La lista de estudiantes estará disponible próximamente.',
+      'info'
     );
   }
 
-  cancelEditing(): void {
-    // Si estaba editando una sesión existente, volver a cargarla
-    if (this.selectedSession && this.selectedSession.id.startsWith('new-session-')) {
-      this.selectedSession = null;
-    } else if (this.selectedSession) {
-      const originalSession = this.courseSessions.find(s => s.id === this.selectedSession.id);
-      if (originalSession) {
-        this.selectedSession = JSON.parse(JSON.stringify(originalSession));
-      } else {
-        this.selectedSession = null;
-      }
-    }
+  onAttendanceClick(classSession: ClassSession): void {
+    this.selectedClassSession = classSession;
+    this.showAttendanceModal = true;
   }
 
-  getStatusText(status: string): string {
-    switch (status) {
-      case 'completed': return 'Completada';
-      case 'in-progress': return 'En Progreso';
-      case 'planned': return 'Planeada';
-      case 'cancelled': return 'Cancelada';
-      default: return '';
-    }
+  onQRClick(classSession: ClassSession): void {
+    console.log('Generar QR para:', classSession);
+    this.selectedClassSession = classSession;
+    this.showAttendanceModal = true;
+
+    // TODO: Trigger QR generation automatically
+    setTimeout(() => {
+      this.toastService.showToast(
+        'QR Generado',
+        'Código QR listo para tomar asistencia.',
+        'success'
+      );
+    }, 500);
   }
 
-  // Métodos comunes
-  showSuccessAlert(title: string, message: string): void {
-    this.alertType = 'success';
-    this.alertTitle = title;
-    this.alertMessage = message;
-    this.showAlert = true;
+  closeAttendanceModal(): void {
+    this.showAttendanceModal = false;
+    this.selectedClassSession = null;
   }
 
-  showErrorAlert(title: string, message: string): void {
-    this.alertType = 'error';
-    this.alertTitle = title;
-    this.alertMessage = message;
-    this.showAlert = true;
-  }
-
-  closeAlert(): void {
-    this.showAlert = false;
+  trackByClassSessionId(index: number, classSession: ClassSession): number {
+    return classSession.id || index;
   }
 }

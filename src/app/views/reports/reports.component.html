@@ -1,0 +1,102 @@
+<div class="container mx-auto px-4 md:px-6 mt-10 min-h-screen p-6 w-full max-w-6xl">
+    <div class="mb-8">
+        <h2 class="text-2xl font-bold text-gray-800 mb-2">Gestión Académica</h2>
+        <p class="text-gray-600">Análisis detallado de sesiones de clase y recursos académicos</p>
+    </div>
+
+    <!-- Loading State -->
+    <div *ngIf="loading" class="flex justify-center items-center h-64">
+        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+        <span class="ml-3 text-gray-600">Cargando datos...</span>
+    </div>
+
+    <!-- Error State -->
+    <div *ngIf="error" class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+        <div class="flex">
+            <div class="flex-shrink-0">
+                <svg class="h-5 w-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd"
+                        d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                        clip-rule="evenodd"></path>
+                </svg>
+            </div>
+            <div class="ml-3">
+                <h3 class="text-sm font-medium text-red-800">Error al cargar los datos</h3>
+                <p class="text-sm text-red-700 mt-1">{{ error }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Container -->
+    <div *ngIf="!loading && !error" class="space-y-8">
+
+        <!-- Gráficas Principales - Grid 2x2 -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+            <!-- Gráfica 1: Distribución por Día -->
+            <div
+                class="bg-white rounded-lg shadow-lg p-6 border border-gray-200 hover:shadow-xl transition-shadow duration-300">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-xl font-semibold text-gray-800">Distribución por Día</h2>
+                    <span
+                        class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                        Semanal
+                    </span>
+                </div>
+                <div id="dayDistributionChart" class="h-80"></div>
+            </div>
+
+            <!-- Gráfica 2: Distribución por Horarios -->
+            <div
+                class="bg-white rounded-lg shadow-lg p-6 border border-gray-200 hover:shadow-xl transition-shadow duration-300">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-xl font-semibold text-gray-800">Franjas Horarias</h2>
+                    <span
+                        class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                        Horario
+                    </span>
+                </div>
+                <div id="timeDistributionChart" class="h-80"></div>
+            </div>
+
+            <!-- Gráfica 3: Utilización de Aulas -->
+            <div
+                class="bg-white rounded-lg shadow-lg p-6 border border-gray-200 hover:shadow-xl transition-shadow duration-300">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-xl font-semibold text-gray-800">Utilización de Aulas</h2>
+                    <span
+                        class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                        Recursos
+                    </span>
+                </div>
+                <div id="classroomUtilizationChart" class="h-80"></div>
+            </div>
+
+            <!-- Gráfica 4: Carga por Profesor -->
+            <div
+                class="bg-white rounded-lg shadow-lg p-6 border border-gray-200 hover:shadow-xl transition-shadow duration-300">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-xl font-semibold text-gray-800">Carga de Profesores</h2>
+                    <span
+                        class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                        Personal
+                    </span>
+                </div>
+                <div id="professorWorkloadChart" class="h-80"></div>
+            </div>
+        </div>
+
+        <!-- Gráfica 5: Distribución de Materias - Ancho Completo -->
+        <div
+            class="bg-white rounded-lg shadow-lg p-6 border border-gray-200 hover:shadow-xl transition-shadow duration-300">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-xl font-semibold text-gray-800">Distribución de Materias</h2>
+                <span
+                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                    Académico
+                </span>
+            </div>
+            <div id="subjectDistributionChart" class="h-96"></div>
+        </div>
+    </div>
+</div>

@@ -12,6 +12,10 @@ import { CareerTableComponent } from "./shared/career-table/career-table.compone
 import { CareerResponse } from '../../core/interfaces/career';
 import { CareerService } from './service/career.service';
 import { CareerFormComponent } from "./shared/career-form/career-form.component";
+import { SubjectsTableComponent } from "./shared/subjects-table/subjects-table.component";
+import { SubjectResponse } from '../../core/interfaces/subject';
+import { SubjectService } from './service/subjects.service';
+import { SubjectsFormComponent } from "./shared/subjects-form/subjects-form.component";
 
 @Component({
   selector: 'app-admin',
@@ -24,11 +28,14 @@ import { CareerFormComponent } from "./shared/career-form/career-form.component"
     UserSearchbarComponent,
     ToastComponent,
     CareerTableComponent,
-    CareerFormComponent
-  ],
+    CareerFormComponent,
+    SubjectsTableComponent,
+    SubjectsFormComponent
+],
   templateUrl: './admin.component.html',
 })
 export default class AdminComponent implements OnInit {
+
   // Datos y estado para usuarios
   allUsers: UserResponse[] = [];
   displayedUsers: UserResponse[] = [];
@@ -44,6 +51,14 @@ export default class AdminComponent implements OnInit {
   careerModalVisible: boolean = false;
   careerEditModalVisible: boolean = false;
 
+  allSubjects: SubjectResponse[] = [];
+  displayedSubjects: SubjectResponse[] = [];
+
+  subjectToEdit: SubjectResponse | null = null;
+  subjectModalVisible: boolean = false;
+  subjectEditModalVisible: boolean = false;
+
+  // Paginación y búsqueda para usuarios
   currentUsersPage = 0;
   usersPageSize = 5;
   usersTotalPages = 0;
@@ -55,15 +70,23 @@ export default class AdminComponent implements OnInit {
   careersTotalPages = 0;
   careersSearchTerm = '';
 
+  // Paginación y búsqueda para carreras
+  currentSubjectPage = 0;
+  subjectsPageSize = 5;
+  subjectsTotalPages = 0;
+  subjectsSearchTerm = '';
+
   // Estados de carga
   loadingStates = {
     users: false,
     departments: false,
     careers: false,
+    subjects: false,
     error: {
       users: false,
       departments: false,
-      careers: false
+      careers: false,
+      subjects: false
     }
   };
 
@@ -79,12 +102,14 @@ export default class AdminComponent implements OnInit {
   dataLoaded = {
     users: false,
     departments: false,
-    careers: false
+    careers: false,
+    subjects: false
   };
 
   constructor(
     private userService: UserService,
     private careerService: CareerService,
+    private subjectService: SubjectService,
     private toastService: ToastService
   ) { }
 
@@ -106,6 +131,9 @@ export default class AdminComponent implements OnInit {
         break;
       case 'careers':
         if (!this.dataLoaded.careers) this.loadCareers();
+        break;
+      case 'subjects':
+        if (!this.dataLoaded.subjects) this.loadSubjects();
         break;
     }
   }
@@ -156,6 +184,32 @@ export default class AdminComponent implements OnInit {
         this.toastService.showToast(
           'Error',
           'No se lograron obtener las carreras.',
+          'error'
+        );
+      }
+    });
+  }
+
+  // Métodos para carreras
+  loadSubjects(): void {
+    if (this.loadingStates.subjects) return;
+
+    this.loadingStates.subjects = true;
+    this.loadingStates.error.subjects = false;
+
+    this.subjectService.getAllSubject().subscribe({
+      next: (data) => {
+        this.allSubjects = data;
+        this.filterAndPaginateSubjects();
+        this.dataLoaded.subjects = true;
+        this.loadingStates.subjects = false;
+      },
+      error: (error) => {
+        this.loadingStates.error.subjects = true;
+        this.loadingStates.subjects = false;
+        this.toastService.showToast(
+          'Error',
+          'No se lograron obtener las materias.',
           'error'
         );
       }
@@ -216,6 +270,32 @@ export default class AdminComponent implements OnInit {
     this.displayedCareers = filtered.slice(startIndex, startIndex + this.careersPageSize);
   }
 
+  // Funcionalidades de búsqueda y paginación para materias
+  onSubjectsSearch(searchTerm: string): void {
+    this.subjectsSearchTerm = searchTerm;
+    this.currentSubjectPage = 0;
+    this.filterAndPaginateSubjects();
+  }
+
+  onSubjectsPageChange(page: number): void {
+    this.currentSubjectPage = page;
+    this.filterAndPaginateSubjects();
+  }
+
+  filterAndPaginateSubjects(): void {
+    let filtered = this.allSubjects;
+    if (this.subjectsSearchTerm) {
+      const search = this.subjectsSearchTerm.toLowerCase();
+      filtered = this.allSubjects.filter(subject =>
+        subject.name.toLowerCase().includes(search)
+      );
+    }
+
+    this.subjectsTotalPages = Math.ceil(filtered.length / this.subjectsPageSize);
+    const startIndex = this.currentSubjectPage * this.subjectsPageSize;
+    this.displayedSubjects = filtered.slice(startIndex, startIndex + this.subjectsPageSize);
+  }
+
   // Métodos para modales
   openUserModal(): void {
     this.userModalVisible = true;
@@ -223,6 +303,10 @@ export default class AdminComponent implements OnInit {
 
   openCareerModal(): void {
     this.careerModalVisible = true;
+  }
+
+  openSubjectModal(): void {
+    this.subjectModalVisible = true;
   }
 
   // Métodos para edición
@@ -234,6 +318,21 @@ export default class AdminComponent implements OnInit {
   onEditCareer(career: CareerResponse): void {
     this.careerToEdit = { ...career };
     this.careerEditModalVisible = true;
+  }
+
+  onEditSubject(subject: SubjectResponse): void {
+    this.subjectToEdit = { ...subject };
+    this.subjectEditModalVisible = true;
+  }
+
+  onCareerCreated(): void {
+    this.loadCareers();
+    this.careerModalVisible = false;
+  }
+
+  onSubjectCreated(): void {
+    this.loadSubjects();
+    this.subjectModalVisible = false;
   }
 
   // Métodos para actualización de datos
@@ -250,8 +349,18 @@ export default class AdminComponent implements OnInit {
     const index = this.allCareers.findIndex(c => c.id === updatedCareer.id);
     if (index !== -1) {
       this.allCareers[index] = updatedCareer;
+      this.filterAndPaginateCareers();
     }
     this.careerEditModalVisible = false;
+  }
+
+  onSubjectUpdated(updatedSubject: SubjectResponse): void {
+    const index = this.allSubjects.findIndex(s => s.id === updatedSubject.id);
+    if (index !== -1) {
+      this.allSubjects[index] = updatedSubject;
+      this.filterAndPaginateSubjects();
+    }
+    this.subjectEditModalVisible = false;
   }
 
   // Métodos para eliminación
@@ -289,6 +398,26 @@ export default class AdminComponent implements OnInit {
         this.toastService.showToast(
           'Error',
           'No se logró eliminar la carrera.',
+          'error'
+        );
+      }
+    });
+  }
+
+  deleteSubject(id: number): void {
+    this.subjectService.deleteSubject(id).subscribe({
+      next: () => {
+        this.loadSubjects();
+        this.toastService.showToast(
+          'Éxito',
+          'Materia eliminada correctamente.',
+          'success'
+        );
+      },
+      error: (error) => {
+        this.toastService.showToast(
+          'Error',
+          'No se logró eliminar la materia.',
           'error'
         );
       }

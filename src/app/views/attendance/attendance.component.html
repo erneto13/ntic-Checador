@@ -1,96 +1,50 @@
-<div class="container mx-auto p-4">
+<div class="container mx-auto px-4 md:px-6 mt-10 min-h-screen p-6 w-full max-w-6xl">
+    <div class="mb-8">
+        <h2 class="text-2xl font-bold text-gray-800 mb-4">Asistencia General</h2>
 
-    <div class="border-b mb-6">
-        <div class="flex flex-wrap">
-            <button (click)="activeMainTab = 'classrooms'"
-                    [ngClass]="{'border-transparent text-gray-500': activeMainTab !== 'classrooms', 'border-blue-600 text-blue-600 font-medium': activeMainTab === 'classrooms'}"
-                    class="px-4 py-2 border-b-2">
-                Programar Temarios
-            </button>
-            <button (click)="activeMainTab = 'attendance'"
-                    [ngClass]="{'border-transparent text-gray-500': activeMainTab !== 'attendance', 'border-blue-600 text-blue-600 font-medium': activeMainTab === 'attendance'}"
-                    class="px-4 py-2 border-b-2">
-                Asistencias
+        <div class="flex flex-col sm:flex-row gap-4 items-end">
+            <div class="w-full sm:w-48">
+                <app-dropdown [options]="daysOfWeek" [placeholder]="'Elige un día'" [label]="'Día'"
+                    [displayField]="'name'" [valueField]="'value'" (selected)="onDaySelected($event)">
+                </app-dropdown>
+            </div>
+
+            <div class="w-full sm:w-48">
+                <app-dropdown [options]="hoursOfDay" [placeholder]="'Elige una hora'" [label]="'Hora'"
+                    [displayField]="'name'" [valueField]="'value'" (selected)="onHourSelected($event)">
+                </app-dropdown>
+            </div>
+
+            <button (click)="loadClassSessions()"
+                class="w-full sm:w-auto px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-all shadow-md hover:shadow-lg">
+                Buscar clases
             </button>
         </div>
     </div>
 
-    <div *ngIf="activeMainTab === 'attendance'" class="space-y-6">
-        <div class="bg-white rounded-lg border shadow-sm p-4">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div class="space-y-2">
-                    <label for="groupSelect" class="block text-sm font-medium text-gray-700">Grupo</label>
-                    <select id="groupSelect" [(ngModel)]="selectedGroup" (change)="loadGroupSchedule()"
-                            class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        <option value="">Seleccionar Grupo</option>
-                        <option *ngFor="let group of groups" [value]="group.id">{{ group.name }} - {{ group.classroom }}
-                        </option>
-                    </select>
-                </div>
-                <div class="space-y-2">
-                    <label for="supervisorSelect" class="block text-sm font-medium text-gray-700">Profesor</label>
-                    <select id="supervisorSelect" [(ngModel)]="currentSupervisor"
-                            class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        <option value="">Seleccionar Profesor</option>
-                        <option *ngFor="let supervisor of supervisors" [value]="supervisor.id">{{ supervisor.name }}
-                        </option>
-                    </select>
-                </div>
-            </div>
-        </div>
-
-        <div class="bg-white rounded-lg border shadow-sm overflow-hidden">
-            <div class="p-4 border-b bg-gray-50">
-                <h2 class="text-lg font-semibold text-gray-800">
-                    {{ selectedGroupName ? selectedGroupName + ' - ' + selectedGroupClassroom : 'Seleccione un grupo' }}
-                </h2>
-                <p class="text-sm text-gray-500">{{ selectedDate | date:'fullDate' }}</p>
-            </div>
-
-            <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-gray-50">
-                        <tr>
-                            <th scope="col"
-                                class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Hora</th>
-                            <th scope="col"
-                                class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Materia</th>
-                            <th scope="col"
-                                class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Profesor</th>
-                            <th scope="col"
-                                class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Asistencia</th>
-                        </tr>
-                    </thead>
-                    <tbody class="bg-white divide-y divide-gray-200">
-                        <tr *ngFor="let schedule of groupSchedules; let i = index" class="hover:bg-gray-50">
-                            <td class="px-3 py-4 whitespace-nowrap text-sm font-medium text-gray-900 text-center">
-                                {{ schedule.startTime }} {{schedule.endTime}}
-                            </td>
-                            <td class="px-3 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
-                                {{ schedule.professor.specialty }}
-                            </td>
-                            <td class="px-3 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
-                                {{ schedule.professor.name }}
-                            </td>
-                            <td class="px-3 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
-                                <div class="flex justify-center items-center">
-                                    <ng-container *ngIf="!attendanceList[i]">
-                                        <button class="pi pi-check text-green-500 text-2xl mx-1" (click)="confirmAttendance(schedule.id, true)"></button>
-                                        <button class="pi pi-times text-red-500 text-2xl mx-1" (click)="confirmAttendance(schedule.id, false)"></button>
-                                    </ng-container>
-                                    <ng-container *ngIf="attendanceList[i]">
-                                        Asistencia Registrada
-                                    </ng-container>
-                                </div>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+    @if (classSessions.length > 0) {
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        @for (classSession of classSessions; track $index) {
+        <app-class-session-attendance [classSession]="classSession" [userRole]="role"
+            (studentListClicked)="onStudentListClick($event)" (attendanceClicked)="onAttendanceClick($event)"
+            (qrClicked)="onQRClick($event)" />
+        }
+    </div>
+    } @else {
+    <div class="bg-gray-100 rounded-lg p-6 shadow-sm">
+        <div class="flex flex-col items-center space-y-3">
+            <i class="pi pi-search-minus text-6xl text-gray-400"></i>
+            <h3 class="text-lg font-medium text-gray-700">No hay resultados</h3>
+            <p class="text-gray-500 text-center">Los resultados de la búsqueda aparecerán aquí. Selecciona un día y
+                una hora para ver las clases disponibles.</p>
         </div>
     </div>
+    }
 </div>
+
+<p-dialog [(visible)]="showAttendanceModal" [modal]="true" [style]="{ width: '80vw', maxWidth: '800px' }"
+    [header]="'Lista de Alumnos'" [closable]="true" (onHide)="showAttendanceModal = false">
+    <app-attendance-details [classSession]="selectedClassSession" (closed)="closeAttendanceModal()" />
+</p-dialog>
+
+<app-toast />

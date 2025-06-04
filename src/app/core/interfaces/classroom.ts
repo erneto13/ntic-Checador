@@ -1,3 +1,7 @@
+import { AttendanceResponse } from "./attendance";
+import { Group } from "./groups";
+import { SubjectResponse } from "./subject";
+
 export interface Professor {
     id: number;
     name: string;
@@ -7,25 +11,26 @@ export interface Professor {
     roleName: string;
 }
 
-export interface ClassroomBase {
-    classroom: string;
-    description: string;
-    groupCode: string;
+export interface Classroom {
     name: string;
-    professor_id?: number;
+    description: string;
 }
 
-export interface Classroom extends ClassroomBase {
-    id?: number;
-    professor?: { id: number };
-}
-
-export interface ClassroomResponse extends ClassroomBase {
+export interface ClassroomResponse {
     id: number;
-    professor?: Professor;
+    name: string;
+    description: string;
 }
 
-export interface LocalTime {
-    hour: number;
-    minute: number;
+export interface ClassSession {
+    id: number;
+    group: Group;
+    subject: SubjectResponse;
+    professor: Professor;
+    classroom: ClassroomResponse;
+    dayOfWeek: string;
+    startTime: string;
+    endTime: string;
+    attendance: AttendanceResponse[];
 }
+

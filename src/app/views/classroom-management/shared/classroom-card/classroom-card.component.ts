@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { Classroom, ClassroomResponse } from '../../../../core/interfaces/classroom';
+import { ClassroomResponse } from '../../../../core/interfaces/classroom';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
@@ -11,9 +11,9 @@ import { FormsModule } from '@angular/forms';
 })
 export class ClassroomCardComponent {
   @Input() classroom!: ClassroomResponse;
-  @Output() onClick = new EventEmitter<Classroom>();
-  @Output() onDelete = new EventEmitter<Classroom>();
-  @Output() onEdit = new EventEmitter<Classroom>();
+  @Output() onClick = new EventEmitter<ClassroomResponse>();
+  @Output() onDelete = new EventEmitter<ClassroomResponse>();
+  @Output() onEdit = new EventEmitter<ClassroomResponse>();
 
   handleClick() {
     this.onClick.emit(this.classroom);

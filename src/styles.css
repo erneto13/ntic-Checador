@@ -2,6 +2,7 @@
 @import "primeng/resources/primeng.css";
 @import "primeicons/primeicons.css";
 
+
 @layer tailwind-base, primeng, tailwind-utilities;
 
 @layer tailwind-base {
