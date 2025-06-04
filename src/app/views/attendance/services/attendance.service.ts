@@ -34,12 +34,28 @@ export class AttendanceService {
   }
 
   /*
+  * VALIDATION METHODS
+  */
+  verifyAttendanceByProfessor(attendanceId: number): Observable<AttendanceResponse> {
+    return this.http.post<AttendanceResponse>(`${this.apiUrl}/${attendanceId}/verify/professor`, {});
+  }
+
+  verifyAttendanceByHeadStudent(attendanceId: number): Observable<AttendanceResponse> {
+    return this.http.post<AttendanceResponse>(`${this.apiUrl}/${attendanceId}/verify/head-student`, {});
+  }
+
+  verifyAttendanceByChecker(attendanceId: number, checkerId: number): Observable<AttendanceResponse> {
+    return this.http.post<AttendanceResponse>(`${this.apiUrl}/${attendanceId}/verify/checker?checkerId=${checkerId}`, {});
+  }
+
+
+  /*
     UTILITY METHODS
   */
 
   /**
-* Verifica si se puede tomar asistencia en el horario actual
-*/
+  * Verifica si se puede tomar asistencia en el horario actual
+  */
   canTakeAttendance(startTime: string, endTime: string): boolean {
     const now = new Date();
     const currentTime = now.getHours() * 60 + now.getMinutes();

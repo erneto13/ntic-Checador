@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
+import { Component, Input, OnInit, Output, SimpleChanges } from '@angular/core';
 import { ToastComponent } from "../../shared/toast/toast.component";
 import { ClassSession } from '../../core/interfaces/groups';
 import { ClassSessionService } from './services/class-session.service';
@@ -25,7 +25,7 @@ interface ScheduleSlot {
   imports: [],
   templateUrl: './class-session.component.html',
 })
-export default class ClassSessionComponent implements OnInit, OnChanges {
+export default class ClassSessionComponent implements OnInit {
   @Input() set refresh(value: boolean) {
     if (value) {
       this.loadClassSessions();
@@ -42,7 +42,7 @@ export default class ClassSessionComponent implements OnInit, OnChanges {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['id'] && !changes['id'].firstChange) {
+    if (changes['groupId'] && !changes['groupId'].firstChange) {
       this.resetComponent();
       this.loadClassSessions();
     }
@@ -55,7 +55,6 @@ export default class ClassSessionComponent implements OnInit, OnChanges {
   }
 
   loadClassSessions(): void {
-    this.resetComponent();
     this.classService.getAllClassSession().subscribe({
       next: (data: any) => {
         this.classSessions = data;

@@ -23,8 +23,8 @@ export const routes: Routes = [
                 loadComponent: () => import('./views/classroom-management/classroom-management.component'),
             },
             {
-                path: 'v1/horarios',
-                loadComponent: () => import('./views/class-session/class-session.component'),
+                path: 'v1/admin/reportes',
+                loadComponent: () => import('./views/reports/reports.component'),
             },
             {
                 path: 'v1/asistencia',

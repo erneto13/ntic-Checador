@@ -1,5 +1,16 @@
 <div class="fixed left-0 top-1/2 -translate-y-1/2 z-20 ml-2">
     <nav class="flex flex-col rounded-lg bg-white/50 shadow-lg backdrop-blur-lg p-1 gap-4 min-w-[68px]">
+
+        <div
+            class="flex aspect-square min-h-[32px] w-22 flex-col items-center justify-center gap-1 rounded-md p-1.5 text-gray-700">
+            <div class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
+            </div>
+
+            <small class="text-center text-xs font-medium">{{ currentUser }}</small>
+            <small class="text-center text-xs text-gray-500">{{ currentRole }}</small>
+        </div>
+
+        @if (currentRole === "ADMIN") {
         <a routerLink="/v1/admin/principal"
             class="flex aspect-square min-h-[32px] w-22 flex-col items-center justify-center gap-1 rounded-md p-1.5 text-gray-700 hover:bg-gray-100"
             routerLinkActive="!text-blue-500 [&>i]:!text-blue-500 font-bold">
@@ -14,20 +25,20 @@
             <small class="text-center text-xs font-medium"> Grupos </small>
         </a>
 
-        <a routerLink="/v1/horarios"
+        <a routerLink="/v1/admin/reportes"
             class="flex aspect-square min-h-[32px] w-22 flex-col items-center justify-center gap-1 rounded-md p-1.5 text-gray-700 hover:bg-gray-100"
             routerLinkActive="!text-blue-500 [&>i]:!text-blue-500 font-bold">
-            <i class="pi pi-calendar-plus text-gray-700" style="font-size: 1.2rem"></i>
-            <small class="text-center text-xs font-medium"> Horarios </small>
+            <i class="pi pi-receipt text-gray-700" style="font-size: 1.2rem"></i>
+            <small class="text-center text-xs font-medium"> Reportes </small>
         </a>
 
+        }
         <a routerLink="/v1/asistencia"
             class="flex aspect-square min-h-[32px] w-22 flex-col items-center justify-center gap-1 rounded-md p-1.5 text-gray-700 hover:bg-gray-100"
             routerLinkActive="!text-blue-500 [&>i]:!text-blue-500 font-bold">
             <i class="pi pi-calendar text-gray-700" style="font-size: 1.2rem"></i>
             <small class="text-center text-xs font-medium"> Asistencia </small>
         </a>
-
         <hr class="dark:border-gray-700/60" />
 
         <a routerLink="/v1/admin/inicio" class="flex h-16 w-22 flex-col items-center justify-center gap-1 text-gray-700"
