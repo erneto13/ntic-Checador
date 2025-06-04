@@ -1,0 +1,50 @@
+<div class="container mx-auto px-4 md:px-6 mt-10 min-h-screen p-6 w-full max-w-6xl">
+    <div class="mb-8">
+        <h2 class="text-2xl font-bold text-gray-800 mb-4">Asistencia General</h2>
+
+        <div class="flex flex-col sm:flex-row gap-4 items-end">
+            <div class="w-full sm:w-48">
+                <app-dropdown [options]="daysOfWeek" [placeholder]="'Elige un día'" [label]="'Día'"
+                    [displayField]="'name'" [valueField]="'value'" (selected)="onDaySelected($event)">
+                </app-dropdown>
+            </div>
+
+            <div class="w-full sm:w-48">
+                <app-dropdown [options]="hoursOfDay" [placeholder]="'Elige una hora'" [label]="'Hora'"
+                    [displayField]="'name'" [valueField]="'value'" (selected)="onHourSelected($event)">
+                </app-dropdown>
+            </div>
+
+            <button (click)="loadClassSessions()"
+                class="w-full sm:w-auto px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-all shadow-md hover:shadow-lg">
+                Buscar clases
+            </button>
+        </div>
+    </div>
+
+    @if (classSessions.length > 0) {
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        @for (classSession of classSessions; track $index) {
+        <app-class-session-attendance [classSession]="classSession" [userRole]="role"
+            (studentListClicked)="onStudentListClick($event)" (attendanceClicked)="onAttendanceClick($event)"
+            (qrClicked)="onQRClick($event)" />
+        }
+    </div>
+    } @else {
+    <div class="bg-gray-100 rounded-lg p-6 shadow-sm">
+        <div class="flex flex-col items-center space-y-3">
+            <i class="pi pi-search-minus text-6xl text-gray-400"></i>
+            <h3 class="text-lg font-medium text-gray-700">No hay resultados</h3>
+            <p class="text-gray-500 text-center">Los resultados de la búsqueda aparecerán aquí. Selecciona un día y
+                una hora para ver las clases disponibles.</p>
+        </div>
+    </div>
+    }
+</div>
+
+<p-dialog [(visible)]="showAttendanceModal" [modal]="true" [style]="{ width: '80vw', maxWidth: '800px' }"
+    [header]="'Lista de Alumnos'" [closable]="true" (onHide)="showAttendanceModal = false">
+    <app-attendance-details [classSession]="selectedClassSession" (closed)="closeAttendanceModal()" />
+</p-dialog>
+
+<app-toast />

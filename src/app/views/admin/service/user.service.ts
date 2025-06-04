@@ -27,24 +27,32 @@ export class UserService {
   deleteUser(userId: number): Observable<void> {
     return this.http.delete<void>(`${this.API_URL}/users/${userId}`);
   }
+
   getUserByUserName(userName: string): Observable<Checker> {
     return this.http.get<Checker>(`${this.API_URL}/users/user/${userName}`);
   }
+
+  getUsersByRole(roleName: string): Observable<UserResponse[]> {
+    return this.http.get<UserResponse[]>(`${this.API_URL}/users/role/${roleName}`);
+  }
+
   getAllUsers(): Observable<UserResponse[]> {
     return this.http.get<UserResponse[]>(`${this.API_URL}/users`);
   }
-  getUserName():string{
+
+  getUserName(): string {
     if (typeof window !== 'undefined') {
       const accessToken = localStorage.getItem('access_token');
       if (accessToken) {
         const payload = JSON.parse(atob(accessToken.split('.')[1]));
-        console.log(payload.name); 
-        return payload.name; 
+        console.log(payload.name);
+        return payload.name;
       }
     }
     return '';
   }
-  getUserRole():string{
+
+  getUserRole(): string {
     //get the user role from the roles array in LOCAL STORAGE
     const roles = localStorage.getItem('roles');
     if (roles) {
@@ -52,7 +60,7 @@ export class UserService {
       const parsedRoles = JSON.parse(roles);
       return parsedRoles[0]; // Assuming roles is an array and you want the first role
     }
-    
+
     return '';
   }
 }

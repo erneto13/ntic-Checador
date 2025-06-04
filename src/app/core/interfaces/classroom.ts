@@ -1,4 +1,4 @@
-import { Attendance } from "./attendance";
+import { AttendanceResponse } from "./attendance";
 import { Group } from "./groups";
 import { SubjectResponse } from "./subject";
 
@@ -11,11 +11,15 @@ export interface Professor {
     roleName: string;
 }
 
+export interface Classroom {
+    name: string;
+    description: string;
+}
+
 export interface ClassroomResponse {
     id: number;
     name: string;
     description: string;
-    classSession: ClassSession[];
 }
 
 export interface ClassSession {
@@ -27,6 +31,6 @@ export interface ClassSession {
     dayOfWeek: string;
     startTime: string;
     endTime: string;
-    attendance: Attendance[];
+    attendance: AttendanceResponse[];
 }
 

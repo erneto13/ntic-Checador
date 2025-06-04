@@ -34,12 +34,13 @@ export class SubjectService {
   }
 
   // Actualizar una materia
-  updateSubject(id: number, payload: { id: number; name: string; career_id: number }): Observable<SubjectResponse> {
+  updateSubject(payload: SubjectResponse): Observable<SubjectResponse> {
     return this.http.put<SubjectResponse>(
-      `${this.apiUrl}/${id}`,
+      `${this.apiUrl}/${payload.id}`,
       payload
     );
   }
+
 
   // Eliminar una materia
   deleteSubject(id: number): Observable<void> {

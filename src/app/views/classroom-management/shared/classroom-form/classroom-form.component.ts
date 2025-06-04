@@ -1,35 +1,30 @@
-import { Component, EventEmitter, Input, OnInit, Output, SimpleChanges } from '@angular/core';
-import { ClassroomResponse, Professor } from '../../../../core/interfaces/classroom';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Classroom, ClassroomResponse } from '../../../../core/interfaces/classroom';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ClassroomService } from '../../service/classroom-service.service';
 import { ToastService } from '../../../../core/services/toast.service';
 import { CommonModule } from '@angular/common';
-import { DropdownComponent } from '../../../../shared/dropdown/dropdown.component';
 
 @Component({
   selector: 'app-classroom-form',
   standalone: true,
-  imports: [FormsModule, CommonModule, ReactiveFormsModule,
-    DropdownComponent],
+  imports: [FormsModule, CommonModule, ReactiveFormsModule],
   templateUrl: './classroom-form.component.html',
 })
 export class ClassroomFormComponent implements OnInit {
-  @Input() classroom!: ClassroomResponse;
-  @Output() classroomCreated = new EventEmitter<ClassroomResponse>();
-  @Output() classroomUpdated = new EventEmitter<ClassroomResponse>();
-  @Output() onCancel = new EventEmitter<void>();
+  @Input() classroom: ClassroomResponse | null = null;
+  @Output() submit = new EventEmitter<void>();
+  @Output() cancel = new EventEmitter<void>();
 
-  professors: Professor[] = [];
+  loading = false;
   classroomForm!: FormGroup;
 
-  constructor(private professorService: ClassroomService,
-    private toastService: ToastService, private fb: FormBuilder) {
-    this.classroomForm = this.fb.group({
-      name: ['', [Validators.required, Validators.maxLength(100)]],
-      classroom: ['', [Validators.required, Validators.maxLength(50)]],
-      description: ['', [Validators.maxLength(500)]],
-      professor_id: ['', [Validators.required]],
-    });
+  constructor(
+    private classroomService: ClassroomService,
+    private toastService: ToastService,
+    private fb: FormBuilder
+  ) {
+    this.initializeForm();
   }
 
   ngOnInit(): void {
@@ -38,37 +33,56 @@ export class ClassroomFormComponent implements OnInit {
     }
   }
 
-  ngOnChanges(changes: SimpleChanges): void {
-    if (changes['classroom'] && this.classroom) {
-      this.patchFormWithClassroom();
-    }
+  initializeForm(): void {
+    this.classroomForm = this.fb.group({
+      name: ['', [Validators.required, Validators.maxLength(100)]],
+      description: ['', [Validators.maxLength(500)]]
+    });
   }
 
   patchFormWithClassroom(): void {
     this.classroomForm.patchValue({
-      name: this.classroom.name,
-      description: this.classroom.description,
+      name: this.classroom?.name,
+      description: this.classroom?.description
     });
   }
 
   onSubmit(): void {
+    if (this.classroomForm.invalid) {
+      this.toastService.showToast('Error', 'Por favor complete todos los campos requeridos', 'error');
+      return;
+    }
 
-  }
+    const classroomData: Classroom = {
+      name: this.classroomForm.value.name,
+      description: this.classroomForm.value.description
+    };
 
-  addClassroom(classroom: ClassroomResponse): void {
-
-  }
-
-  updateClassroom(id: number, classroom: ClassroomResponse): void {
-
-  }
-
-  onProfessorSelected(professor: any) {
-    this.classroomForm.get('professor_id')?.setValue(professor?.id || null);
+    if (this.classroom) {
+      this.classroomService.updateClassRoom(this.classroom.id, classroomData).subscribe({
+        next: () => {
+          this.submit.emit();
+          this.toastService.showToast('Éxito', 'Aula actualizada correctamente', 'success');
+        },
+        error: () => {
+          this.toastService.showToast('Error', 'No se pudo actualizar el aula', 'error');
+        }
+      });
+    } else {
+      this.classroomService.createClassRoom(classroomData).subscribe({
+        next: () => {
+          this.toastService.showToast('Éxito', 'Aula creada correctamente', 'success');
+          this.submit.emit();
+        },
+        error: () => {
+          this.toastService.showToast('Error', 'No se pudo crear el aula', 'error');
+        }
+      });
+    }
   }
 
   cancelForm(): void {
-    this.onCancel.emit();
+    this.cancel.emit();
     this.classroomForm.reset();
   }
 }

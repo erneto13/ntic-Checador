@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { environment } from '../../../../environments/environment.development';
 import { Observable } from 'rxjs';
-import { Group } from '../../../core/interfaces/groups';
+import { Group, GroupResponse } from '../../../core/interfaces/groups';
 
 @Injectable({
   providedIn: 'root'
@@ -13,8 +13,8 @@ export class GroupsService {
   constructor(private http: HttpClient) { }
 
 
-  getAllGroups(): Observable<Group[]> {
-    return this.http.get<Group[]>(this.apiUrl);
+  getAllGroups(): Observable<GroupResponse[]> {
+    return this.http.get<GroupResponse[]>(this.apiUrl);
   }
 
   getGroupById(id: number): Observable<Group> {

@@ -38,7 +38,7 @@ export class SubjectsFormComponent implements OnInit {
   initForm(): void {
     this.subjectForm = this.fb.group({
       name: ['', [Validators.required]],
-      career_id: ['', [Validators.required]],
+      careerId: ['', [Validators.required]],
     })
   }
 
@@ -69,7 +69,7 @@ export class SubjectsFormComponent implements OnInit {
   patchSubject(): void {
     this.subjectForm.patchValue({
       name: this.subject?.name,
-      career_id: this.subject?.career?.id
+      careerId: this.subject?.careerId
     });
   }
 
@@ -90,18 +90,18 @@ export class SubjectsFormComponent implements OnInit {
     } else {
       const newSubject = {
         name: formValues.name,
-        career_id: formValues.career_id
+        careerId: formValues.careerId
       };
       this.registerSubject(newSubject);
     }
   }
 
   registerSubject(register: any): void {
-    const careerId = this.subjectForm.value.career_id;
+    const careerId = this.subjectForm.value.careerId;
 
     const subjectData: Subject = {
       name: register.name,
-      career_id: careerId,
+      careerId: careerId,
     };
 
     this.subjectService.createSubjectWithCareer(subjectData, careerId).subscribe({
@@ -128,10 +128,12 @@ export class SubjectsFormComponent implements OnInit {
     const payload = {
       id: id,
       name: formValue.name,
-      career_id: formValue.career_id
+      careerId: formValue.careerId, 
+      careerName: '', 
+      professorIds: []
     };
 
-    this.subjectService.updateSubject(id, payload).subscribe({
+    this.subjectService.updateSubject(payload).subscribe({
       next: (updatedSubject) => {
         this.toastService.showToast('Éxito', 'Materia actualizada', 'success');
         this.subjectUpdated.emit(updatedSubject);

@@ -2,15 +2,16 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DialogModule } from 'primeng/dialog';
 import { ClassroomResponse } from '../../core/interfaces/classroom';
-import { Group } from '../../core/interfaces/groups';
+import { Group, GroupResponse } from '../../core/interfaces/groups';
 import { ClassroomService } from './service/classroom-service.service';
 import { GroupsService } from './service/groups.service';
 import { ToastService } from '../../core/services/toast.service';
 import { ToastComponent } from '../../shared/toast/toast.component';
 import { ClassroomFormComponent } from './shared/classroom-form/classroom-form.component';
 import { ClassroomCardComponent } from './shared/classroom-card/classroom-card.component';
-import { ClassroomDetailsComponent } from './shared/classroom-details/classroom-details.component';
 import { GroupCardComponent } from './shared/group-card/group-card.component';
+import { GroupFormComponent } from "./shared/group-form/group-form.component";
+import { GroupDetailsComponent } from "./shared/group-details/group-details.component";
 
 @Component({
   selector: 'app-academic-management',
@@ -21,26 +22,31 @@ import { GroupCardComponent } from './shared/group-card/group-card.component';
     ToastComponent,
     ClassroomFormComponent,
     ClassroomCardComponent,
-    ClassroomDetailsComponent,
-    GroupCardComponent
+    GroupCardComponent,
+    GroupFormComponent,
+    GroupDetailsComponent
   ],
   templateUrl: './classroom-management.component.html',
 })
 export default class ClassroomManagement implements OnInit {
-  // Data properties
   classrooms: ClassroomResponse[] = [];
-  groups: Group[] = [];
+  groups: GroupResponse[] = [];
 
-  // Selected items
+  // Selected items for edit/create
   selectedItem?: ClassroomResponse | Group;
-  selectedItemDetails?: ClassroomResponse | Group;
+
+  // Selected items for details (específicos para cada tipo)
+  selectedGroupDetails?: GroupResponse;
+  selectedClassroomDetails?: ClassroomResponse;
 
   // UI State properties
   activeTab: 'groups' | 'classrooms' = 'groups';
-  showFormModal = false;
-  showDetailsModal = false;
-  isEditMode = false;
-  formType: 'classroom' | 'group' = 'classroom';
+  showGroupCreateModal = false;
+  showGroupEditModal = false;
+  showGroupDetailsModal = false; // Nuevo modal para detalles de grupo
+  showClassroomCreateModal = false;
+  showClassroomEditModal = false;
+  showClassroomDetailsModal = false; // Nuevo modal para detalles de aula
 
   constructor(
     private classroomService: ClassroomService,
@@ -60,14 +66,14 @@ export default class ClassroomManagement implements OnInit {
     this.loadClassrooms();
   }
 
-  private loadGroups(): void {
+  loadGroups(): void {
     this.groupService.getAllGroups().subscribe({
       next: (data) => this.groups = data,
       error: () => this.showErrorToast('Error', 'No se pudieron cargar los grupos')
     });
   }
 
-  private loadClassrooms(): void {
+  loadClassrooms(): void {
     this.classroomService.getAllClassRooms().subscribe({
       next: (data) => this.classrooms = data,
       error: () => this.showErrorToast('Error', 'No se pudieron cargar las aulas')
@@ -77,28 +83,38 @@ export default class ClassroomManagement implements OnInit {
   // ========================
   // MODAL MANAGEMENT
   // ========================
-  openCreateModal(type: 'classroom' | 'group'): void {
-    this.formType = type;
-    this.isEditMode = false;
+  openCreateModal(): void {
+    if (this.activeTab === 'groups') {
+      this.showGroupCreateModal = true;
+    } else {
+      this.showClassroomCreateModal = true;
+    }
     this.selectedItem = undefined;
-    this.showFormModal = true;
   }
 
-  openEditModal(item: ClassroomResponse | Group): void {
-    this.selectedItem = item;
-    this.formType = item.hasOwnProperty('capacity') ? 'classroom' : 'group';
-    this.isEditMode = true;
-    this.showFormModal = true;
+  // Nuevos métodos para abrir modales de detalles
+  openGroupDetailsModal(group: GroupResponse): void {
+    this.selectedGroupDetails = group;
+    this.showGroupDetailsModal = true;
   }
 
-  openDetailsModal(item: ClassroomResponse | Group): void {
-    this.selectedItemDetails = item;
-    this.showDetailsModal = true;
+  openClassroomDetailsModal(classroom: ClassroomResponse): void {
+    this.selectedClassroomDetails = classroom;
+    this.showClassroomDetailsModal = true;
   }
 
   closeModal(): void {
-    this.showFormModal = false;
-    this.showDetailsModal = false;
+    this.showGroupCreateModal = false;
+    this.showGroupEditModal = false;
+    this.showGroupDetailsModal = false;
+    this.showClassroomCreateModal = false;
+    this.showClassroomEditModal = false;
+    this.showClassroomDetailsModal = false;
+
+    // Limpiar selecciones
+    this.selectedItem = undefined;
+    this.selectedGroupDetails = undefined;
+    this.selectedClassroomDetails = undefined;
   }
 
   // ========================
@@ -106,11 +122,45 @@ export default class ClassroomManagement implements OnInit {
   // ========================
   onFormSubmit(): void {
     this.closeModal();
-    if (this.formType === 'classroom') {
-      this.loadClassrooms();
-    } else {
+    if (this.activeTab === 'groups') {
       this.loadGroups();
+    } else {
+      this.loadClassrooms();
     }
+  }
+
+  deleteGroup(group: GroupResponse): void {
+    if (!group.id) {
+      this.showErrorToast('Error', 'El grupo no tiene un ID válido');
+      return;
+    }
+
+    this.groupService.deleteGroup(group.id).subscribe({
+      next: () => {
+        this.groups = this.groups.filter(c => c.id !== group.id);
+        this.showSuccessToast('Éxito', 'Grupo eliminado correctamente');
+      },
+      error: () => {
+        this.showErrorToast('Error', 'No se pudo eliminar el grupo');
+      }
+    });
+  }
+
+  deleteClassroom(classroom: ClassroomResponse): void {
+    if (!classroom.id) {
+      this.showErrorToast('Error', 'El aula no tiene un ID válido');
+      return;
+    }
+
+    this.classroomService.deleteClassRoom(classroom.id).subscribe({
+      next: () => {
+        this.classrooms = this.classrooms.filter(c => c.id !== classroom.id);
+        this.showSuccessToast('Éxito', 'Aula eliminada correctamente');
+      },
+      error: () => {
+        this.showErrorToast('Error', 'No se pudo eliminar el aula');
+      }
+    });
   }
 
   // ========================

@@ -1,21 +1,15 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { Group } from '../../../../core/interfaces/groups';
+import { GroupResponse } from '../../../../core/interfaces/groups';
 
 @Component({
   selector: 'app-group-card',
   standalone: true,
-  imports: [],
   templateUrl: './group-card.component.html',
 })
 export class GroupCardComponent {
-  @Input() group!: Group;
-  @Output() onClick = new EventEmitter<Group>();
-  @Output() onDelete = new EventEmitter<Group>();
-  @Output() onEdit = new EventEmitter<Group>();
-
-  handleClick() {
-    this.onClick.emit(this.group);
-  }
+  @Input() group!: GroupResponse;
+  @Output() onDelete = new EventEmitter<GroupResponse>();
+  @Output() onEdit = new EventEmitter<GroupResponse>();
 
   handleEdit() {
     this.onEdit.emit(this.group);
@@ -50,11 +44,29 @@ export class GroupCardComponent {
     if (validSessions.length === 0) return '--:--';
 
     const avgHour = validSessions.reduce((sum, session) => {
-      const [hours] = session.startTime!.split(':').map(Number);
+      // Manejo del formato de startTime que viene como array [hours, minutes]
+      const hours = Array.isArray(session.startTime) ? session.startTime[0] : 0;
       return sum + hours;
     }, 0) / validSessions.length;
 
     return `${Math.round(avgHour)}:00 aprox`;
+  }
+
+  formatTime(time: any): string {
+    if (!time) return '--:--';
+
+    // Si es un array [hours, minutes]
+    if (Array.isArray(time)) {
+      const [hours, minutes] = time;
+      return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+    }
+
+    // Si es string (formato HH:MM)
+    if (typeof time === 'string' && time.includes(':')) {
+      return time;
+    }
+
+    return '--:--';
   }
 
   private translateDay(day: string): string {

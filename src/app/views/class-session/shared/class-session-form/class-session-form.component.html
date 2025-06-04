@@ -1,0 +1,124 @@
+@defer (on viewport) {
+<form [formGroup]="classSessionForm" (ngSubmit)="onSubmit()" class="space-y-4">
+    <div class="flex items-center justify-between mb-4">
+        <h4 class="font-medium text-gray-800 flex items-center">
+            <i class="pi pi-clock text-gray-500 mr-2"></i>
+            Programar nueva clase {{ group.name }}
+        </h4>
+        <div class="flex items-center gap-2">
+            <span class="text-xs text-gray-500">{{ group.classSessions?.length || 0 }} clases programadas</span>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="space-y-1">
+            <app-dropdown formControlName="subject" [options]="subjects" [placeholder]="'Seleccione una materia'"
+                [label]="'Materia'" [displayField]="'name'" [objectField]="subjects" />
+            @if (classSessionForm.get('subject')?.invalid && (classSessionForm.get('subject')?.dirty ||
+            classSessionForm.get('subject')?.touched)) {
+            <p class="text-sm text-red-600">Por favor seleccione una materia</p>
+            }
+        </div>
+
+        <div class="space-y-1">
+            <app-dropdown formControlName="professor" [options]="professors" [placeholder]="'Seleccione un profesor'"
+                [label]="'Profesor'" [displayField]="'name'" [objectField]="professors" />
+            @if (classSessionForm.get('professor')?.invalid && (classSessionForm.get('professor')?.dirty ||
+            classSessionForm.get('professor')?.touched)) {
+            <p class="text-sm text-red-600">Por favor seleccione un profesor</p>
+            }
+        </div>
+
+        <div class="space-y-1">
+            <app-dropdown formControlName="classroom" [options]="classRooms" [placeholder]="'Seleccione un aula'"
+                [label]="'Aula'" [displayField]="'name'" [valueField]="'id'" />
+            @if (classSessionForm.get('classroom')?.invalid && (classSessionForm.get('classroom')?.dirty ||
+            classSessionForm.get('classroom')?.touched)) {
+            <p class="text-sm text-red-600">Por favor seleccione un aula</p>
+            }
+        </div>
+
+        <div class="space-y-1">
+            <label class="block text-sm font-medium text-gray-700">Programación</label>
+            <div class="space-y-2">
+                <label class="flex items-center">
+                    <input type="checkbox" (change)="onAllDaysChange($event)" [checked]="isAllDaysSelected"
+                        class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                    <span class="ml-2 text-sm text-gray-700 font-medium">Todos los días</span>
+                </label>
+            </div>
+        </div>
+
+        <div class="space-y-1">
+            <label class="block text-sm font-medium text-gray-700">Días de la semana</label>
+            <div class="border border-gray-300 rounded-md p-3 bg-white">
+                <div class="grid grid-cols-2 gap-2">
+                    @for (day of daysOfWeek; track day.value) {
+                    <label class="flex items-center space-x-2">
+                        <input type="checkbox" [value]="day.value" (change)="onDayCheckboxChange($event, day.value)"
+                            [checked]="selectedDays.includes(day.value)"
+                            class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                        <span class="text-sm text-gray-700">{{ day.name }}</span>
+                    </label>
+                    }
+                </div>
+            </div>
+            @if (selectedDays.length === 0 && classSessionForm.touched) {
+            <p class="text-sm text-red-600">Por favor seleccione al menos un día</p>
+            }
+        </div>
+
+        <div class="space-y-1">
+            <label for="startTime" class="block text-sm font-medium text-gray-700">Hora de inicio</label>
+            <input type="time" id="startTime" formControlName="startTime"
+                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500" />
+            @if (classSessionForm.get('startTime')?.invalid && (classSessionForm.get('startTime')?.dirty ||
+            classSessionForm.get('startTime')?.touched)) {
+            <p class="text-sm text-red-600">Por favor ingrese una hora válida</p>
+            }
+        </div>
+
+        <div class="space-y-1">
+            <label for="endTime" class="block text-sm font-medium text-gray-700">Hora de fin</label>
+            <input type="time" id="endTime" formControlName="endTime"
+                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500" />
+            @if (classSessionForm.get('endTime')?.invalid && (classSessionForm.get('endTime')?.dirty ||
+            classSessionForm.get('endTime')?.touched)) {
+            <p class="text-sm text-red-600">Por favor ingrese una hora válida</p>
+            }
+        </div>
+
+        @if (classSessionForm.errors?.['timeRangeInvalid'] && (classSessionForm.touched || classSessionForm.dirty)) {
+        <div class="col-span-full">
+            <p class="text-sm text-red-600">La hora de inicio debe ser anterior a la hora de fin</p>
+        </div>
+        }
+
+        @if (classSessionForm.errors?.['minDurationInvalid'] && (classSessionForm.touched || classSessionForm.dirty)) {
+        <div class="col-span-full">
+            <p class="text-sm text-red-600">La clase debe tener al menos 30 minutos de duración</p>
+        </div>
+        }
+    </div>
+
+    <div class="flex justify-end gap-3 pt-4">
+        <button type="button" (click)="cancelForm()"
+            class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2">
+            Cancelar
+        </button>
+        <button type="submit" [disabled]="!isFormValid() || loading"
+            class="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed">
+            @if (loading) {
+            <i class="pi pi-spinner pi-spin mr-2"></i>
+            }
+            Programar clase{{ selectedDays.length > 1 ? 's' : '' }}
+        </button>
+    </div>
+</form>
+} @placeholder {
+<div class="animate-pulse">
+    <div class="h-6 bg-gray-200 rounded w-1/3 mb-2"></div>
+    <div class="h-4 bg-gray-200 rounded w-1/4 mb-1"></div>
+    <div class="h-4 bg-gray-200 rounded w-1/5"></div>
+</div>
+}

@@ -1,4 +1,4 @@
-import { Attendance } from "./attendance";
+import { AttendanceResponse } from "./attendance";
 import { CareerResponse } from "./career";
 import { ClassroomResponse } from "./classroom";
 import { Professor } from "./schedule";
@@ -6,6 +6,13 @@ import { SubjectResponse } from "./subject";
 import { UserResponse } from "./user";
 
 export interface Group {
+    id?: number;
+    name: string;
+    career?: CareerResponse | null;
+    headStudent?: UserResponse | null;
+}
+
+export interface GroupResponse {
     id?: number;
     name: string;
     career?: CareerResponse;
@@ -22,6 +29,16 @@ export interface ClassSession {
     dayOfWeek?: string;
     startTime?: string;
     endTime?: string;
-    attendances?: Attendance[];
+    attendances?: AttendanceResponse[];
+}
+
+export interface ClassSessionRecord {
+    group?: Group;
+    subject?: SubjectResponse;
+    professor?: Professor;
+    classRoom?: ClassroomResponse;
+    dayOfWeek?: string;
+    startTime?: string;
+    endTime?: string;
 }
 

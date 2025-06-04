@@ -56,6 +56,7 @@ export class DropdownComponent implements ControlValueAccessor {
   @Input() label: string = '';
   @Input() displayField: string = 'name';
   @Input() valueField: string = 'id';
+  @Input() objectField!: any[];
 
   @Output() selected = new EventEmitter<any>();
 

@@ -23,4 +23,13 @@ export class ClassSessionService {
   deleteClassSession(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
+
+  getClassSessionsByDayAndTime(dayOfWeek: string, startTime: string): Observable<ClassSession[]> {
+    return this.http.get<ClassSession[]>(`${this.apiUrl}/search`, {
+      params: {
+        dayOfWeek,
+        startTime
+      }
+    });
+  }
 }

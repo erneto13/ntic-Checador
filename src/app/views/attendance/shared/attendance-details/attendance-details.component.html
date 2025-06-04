@@ -1,0 +1,157 @@
+<div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden">
+
+        <div class="bg-gradient-to-r from-blue-600 to-cyan-200 text-white p-6">
+            <div class="flex justify-between items-start">
+                <div>
+                    <h2 class="text-2xl font-bold">{{ classSession?.subject?.name || 'Clase' }}</h2>
+                    <p class="text-indigo-100 mt-1">{{ classSession?.group?.name }} - {{ classSession?.startTime }} a {{
+                        classSession?.endTime }}</p>
+                    <div class="flex items-center mt-2">
+                        <i class="pi pi-clock mr-2"></i>
+                        <span class="text-sm" [ngClass]="getTimeStatusClass()">{{ timeStatus }}</span>
+                    </div>
+                </div>
+                <button (click)="closeModal()" class="text-white hover:text-gray-200 text-2xl">
+                    <i class="pi pi-times"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="p-4 border-b border-gray-200 bg-gray-50">
+            <div class="flex justify-between items-center">
+                <div class="flex space-x-2">
+                    @if (canTakeAttendance()) {
+                    <button (click)="initializeAttendance()" [disabled]="isLoading"
+                        class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center">
+                        <i class="pi pi-plus mr-2"></i>
+                        {{ currentUserRole === 'PROFESSOR' ? 'Tomar Asistencia' : 'Registrar Asistencia' }}
+                    </button>
+                    } @else {
+                    <button disabled class="px-4 py-2 text-slate-900 rounded-lg cursor-not-allowed flex items-center">
+                        <i class="pi pi-ban mr-2"></i>
+                        {{ hasRegisteredToday ? 'Ya Registrado' : 'No Disponible' }}
+                        @if (hasRegisteredToday) {
+                        <button (click)="loadAttendances()" class="ml-2 text-sm text-blue-400 hover:underline">
+                            <i class="pi pi ml-2"></i>
+                            Recargar tabla
+                        </button>
+                        }
+                    </button>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="p-6 overflow-y-auto max-h-96">
+            @if (attendances.length === 0 && !isLoading) {
+            <div class="text-center py-8">
+                <i class="pi pi-users text-6xl text-gray-400 mb-4"></i>
+                <h3 class="text-lg font-medium text-gray-700 mb-2">No hay registros de asistencia</h3>
+                <p class="text-gray-500 mb-4">
+                    @if (canTakeAttendance()) {
+                    Haz clic en "Registrar Asistencia" para crear el primer registro
+                    } @else {
+                    {{ getCannotRegisterReason() }}
+                    }
+                </p>
+            </div>
+            }
+
+            @if (isLoading) {
+            <div class="text-center py-8">
+                <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
+                <p class="text-gray-600">Cargando asistencias...</p>
+            </div>
+            }
+
+            @if (!canTakeAttendance() && attendances.length > 0) {
+            <div class="mb-4 p-4 rounded-lg"
+                [ngClass]="hasRegisteredToday ? 'bg-blue-50 border border-blue-200' : 'bg-yellow-50 border border-yellow-200'">
+                <div class="flex items-center">
+                    <i class="mr-2"
+                        [ngClass]="hasRegisteredToday ? 'pi pi-check-circle text-blue-600' : 'pi pi-exclamation-triangle text-yellow-600'"></i>
+                    <div>
+                        <h4 class="text-sm font-medium"
+                            [ngClass]="hasRegisteredToday ? 'text-blue-800' : 'text-yellow-800'">
+                            {{ hasRegisteredToday ? 'Asistencia ya registrada' : 'Acción no permitida' }}
+                        </h4>
+                        <p class="text-sm" [ngClass]="hasRegisteredToday ? 'text-blue-700' : 'text-yellow-700'">
+                            {{ getCannotRegisterReason() }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+            }
+
+            <div class="space-y-3">
+                @for (attendance of attendances; track attendance.id) {
+                <div class="bg-white border border-gray-200 rounded-lg p-4"
+                    [ngClass]="{'ring-2 ring-blue-200 bg-blue-50': isCurrentUserAttendance(attendance)}">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 rounded-full flex items-center justify-center"
+                                [ngClass]="isCurrentUserAttendance(attendance) ? 'bg-blue-100' : 'bg-indigo-100'">
+                                <span class="font-medium text-sm"
+                                    [ngClass]="isCurrentUserAttendance(attendance) ? 'text-blue-600' : 'text-indigo-600'">
+                                    {{ attendance.date | date:'dd' }}
+                                </span>
+                            </div>
+
+                            <div>
+                                <h4 class="font-medium text-gray-900">
+                                    {{ attendance.date | date:'mediumDate' }}
+                                    @if (isCurrentUserAttendance(attendance)) {
+                                    <span class="ml-2 text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
+                                        Tu registro
+                                    </span>
+                                    }
+                                </h4>
+                                <p class="text-sm text-gray-500">
+                                    Estado: {{ attendance.attended ? 'Presente' : 'Ausente' }}
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center space-x-2">
+                            @if (attendance.professorVerified) {
+                            <span title="Verificado por profesor"
+                                class="w-6 h-6 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center">
+                                <i class="pi pi-user-edit text-xs"></i>
+                            </span>
+                            }
+
+                            @if (attendance.checkerVerified) {
+                            <span title="Verificado por checador"
+                                class="w-6 h-6 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center">
+                                <i class="pi pi-id-card text-xs"></i>
+                            </span>
+                            }
+
+                            @if (attendance.headStudentVerified) {
+                            <span title="Verificado por jefe de grupo"
+                                class="w-6 h-6 bg-green-100 text-green-600 rounded-full flex items-center justify-center">
+                                <i class="pi pi-users text-xs"></i>
+                            </span>
+                            }
+                        </div>
+                    </div>
+
+                    @if (attendance.professorVerified || attendance.checkerVerified || attendance.headStudentVerified) {
+                    <div class="mt-2 text-xs text-gray-500">
+                        Registrado por:
+                        @if (attendance.professorVerified) { Profesor }
+                        @if (attendance.checkerVerified) { Supervisor }
+                        @if (attendance.headStudentVerified) { Jefe de grupo }
+
+                        @if (attendance.checkerVerified && attendance.checkerId) {
+                        <span class="ml-1">(ID: {{ attendance.checkerId }})</span>
+                        }
+                    </div>
+                    }
+                </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>

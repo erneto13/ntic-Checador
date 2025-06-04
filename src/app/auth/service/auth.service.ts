@@ -5,7 +5,15 @@ import { Router } from '@angular/router';
 import { AuthRequest } from '../../core/interfaces/auth-request';
 import { map, Observable, tap } from 'rxjs';
 import { TokenResponse } from '../../core/interfaces/token-response';
-import { User } from '../../core/interfaces/user';
+import { jwtDecode } from 'jwt-decode';
+
+interface JwtPayload {
+  role?: {
+    id: number;
+    name: string;
+  };
+  [key: string]: any;
+}
 
 @Injectable({
   providedIn: 'root'
@@ -16,7 +24,7 @@ export class AuthService {
   private REGISTER_URL = `${environment.apiUrl}/auth/register`;
   private REFRESH_URL = `${environment.apiUrl}/auth/refresh-token`;
 
-  constructor(private http: HttpClient, private router: Router, ) { }
+  constructor(private http: HttpClient, private router: Router,) { }
 
   login(request: AuthRequest): Observable<TokenResponse> {
     return this.http.post<TokenResponse>(this.LOGIN_URL, request)
@@ -25,7 +33,7 @@ export class AuthService {
           this.saveTokens(response);
         })
       );
-    }
+  }
 
   register(request: any): Observable<TokenResponse> {
     return this.http.post<TokenResponse>(this.REGISTER_URL, request)
@@ -39,7 +47,7 @@ export class AuthService {
   refreshToken(): Observable<TokenResponse> {
     const refreshToken = this.getRefreshToken();
     const headers = new HttpHeaders().set('Authorization', `Bearer ${refreshToken}`);
-    
+
     return this.http.post<TokenResponse>(this.REFRESH_URL, {}, { headers })
       .pipe(
         tap(response => {
@@ -92,9 +100,19 @@ export class AuthService {
     if (typeof window !== 'undefined') {
       localStorage.setItem('access_token', tokens.access_token);
       localStorage.setItem('refresh_token', tokens.refresh_token);
-      if (tokens.roles) {
-        localStorage.setItem('roles', JSON.stringify(tokens.roles));
-      }
+    }
+  }
+
+  getRoleFromToken(): string | null {
+    const token = this.getAccessToken();
+    if (!token) return null;
+
+    try {
+      const decoded: JwtPayload = jwtDecode(token);
+      return decoded.role?.name ?? null;
+    } catch (error) {
+      console.error('Error decoding token:', error);
+      return null;
     }
   }
 }
