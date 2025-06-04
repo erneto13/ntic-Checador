@@ -1,4 +1,4 @@
 export const environment = {
     production: false,
-    apiUrl: 'https://ntic-checadorbackend-production-6448.up.railway.app/api/v1'
+    apiUrl: 'https://ntic-back-4e6cf83d4e7e.herokuapp.com/'
 };
